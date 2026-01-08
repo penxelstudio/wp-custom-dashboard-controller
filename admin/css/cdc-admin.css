@@ -1,0 +1,1026 @@
+/**
+ * Custom Dashboard Controller - Admin Styles
+ * 
+ * @package CustomDashboardController
+ * @version 1.4.0
+ * 
+ * Table of Contents:
+ * 1. General Settings Page
+ * 2. Tab Navigation
+ * 3. Settings Sections
+ * 4. Color Picker & Logo Upload
+ * 5. Info Boxes
+ * 6. Role Cards & Menu Lists
+ * 7. Submenu Selector
+ * 8. Menu Order - Sortable Lists
+ * 9. Preview Panel
+ * 10. Status Messages
+ * 11. Responsive Styles
+ */
+
+/* ===========================================
+   1. General Settings Page
+   =========================================== */
+
+.cdc-settings-wrap {
+    max-width: 1400px;
+    margin-top: 20px;
+}
+
+.cdc-settings-wrap h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 23px;
+    font-weight: 400;
+    margin-bottom: 20px;
+}
+
+.cdc-settings-wrap h1 .dashicons {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+}
+
+.cdc-version {
+    font-size: 12px;
+    color: #666;
+    background: #f0f0f1;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 10px;
+}
+
+/* ===========================================
+   2. Tab Navigation
+   =========================================== */
+
+.cdc-nav-tabs {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #c3c4c7;
+}
+
+.cdc-nav-tabs .nav-tab {
+    padding: 10px 20px;
+    font-size: 14px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    color: #50575e;
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+.cdc-nav-tabs .nav-tab:hover {
+    background: #f6f7f7;
+    color: #1d2327;
+}
+
+.cdc-nav-tabs .nav-tab-active {
+    background: #fff;
+    border-color: #c3c4c7;
+    border-bottom-color: #fff;
+    color: #1d2327;
+    margin-bottom: -1px;
+}
+
+.cdc-tab-content {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 20px;
+}
+
+/* ===========================================
+   3. Settings Sections
+   =========================================== */
+
+.cdc-settings-section {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cdc-settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.cdc-settings-section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d2327;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.cdc-settings-section h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1d2327;
+    margin: 0 0 15px 0;
+}
+
+.cdc-settings-section > .description {
+    color: #646970;
+    margin-bottom: 20px;
+}
+
+/* ===========================================
+   4. Color Picker & Logo Upload
+   =========================================== */
+
+.cdc-color-picker {
+    width: 100px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cdc-logo-upload {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.cdc-logo-preview {
+    width: 120px;
+    height: 60px;
+    border: 2px dashed #c3c4c7;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f6f7f7;
+    overflow: hidden;
+}
+
+.cdc-logo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.cdc-no-logo {
+    color: #787c82;
+    font-size: 11px;
+    text-align: center;
+}
+
+.cdc-logo-upload .description {
+    width: 100%;
+    margin-top: 5px;
+}
+
+/* ===========================================
+   5. Info Boxes
+   =========================================== */
+
+.cdc-info-box {
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+}
+
+.cdc-info-box .dashicons {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.cdc-info-green {
+    background: #d1e7dd;
+    border-left: 4px solid #198754;
+    color: #0f5132;
+}
+
+.cdc-info-blue {
+    background: #cfe2ff;
+    border-left: 4px solid #0d6efd;
+    color: #084298;
+}
+
+.cdc-info-purple {
+    background: #e2d9f3;
+    border-left: 4px solid #6f42c1;
+    color: #432874;
+}
+
+.cdc-info-orange {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    color: #664d03;
+}
+
+/* ===========================================
+   6. Role Cards & Menu Lists
+   =========================================== */
+
+.cdc-roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.cdc-role-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.cdc-role-header {
+    background: linear-gradient(135deg, #6b5ce7 0%, #8b5cf6 100%);
+    color: #fff;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cdc-role-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.cdc-hidden-count {
+    background: rgba(255,255,255,0.2);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.cdc-role-actions {
+    padding: 10px 15px;
+    background: #f6f7f7;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    gap: 8px;
+}
+
+.cdc-role-actions .button {
+    font-size: 11px;
+    padding: 2px 8px;
+    height: auto;
+}
+
+.cdc-menu-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.cdc-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cdc-menu-item:hover {
+    background: #e8f4fc;
+    border-color: #0073aa;
+}
+
+.cdc-menu-item.cdc-hidden {
+    background: #fff3e0;
+    border-color: #ff9800;
+}
+
+.cdc-menu-item input[type="checkbox"] {
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.cdc-menu-name {
+    flex: 1;
+    font-size: 13px;
+}
+
+.cdc-menu-status {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* ===========================================
+   7. Submenu Selector
+   =========================================== */
+
+.cdc-submenu-selector {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f6f7f7;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.cdc-submenu-selector label {
+    white-space: nowrap;
+}
+
+.cdc-select {
+    min-width: 300px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.cdc-submenu-panel,
+.cdc-submenu-order-panel {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* ===========================================
+   8. Menu Order - Sortable Lists
+   =========================================== */
+
+.cdc-order-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 30px;
+    align-items: start;
+}
+
+.cdc-order-panel {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.cdc-order-panel h3 {
+    margin-top: 0;
+}
+
+.cdc-sortable-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.cdc-sortable-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: grab;
+    transition: all 0.2s ease;
+}
+
+.cdc-sortable-item:hover {
+    background: #e8f4fc;
+    border-color: #0073aa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.cdc-sortable-item.ui-sortable-helper {
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: grabbing;
+}
+
+.cdc-sortable-item.ui-sortable-placeholder {
+    background: #e0f0ff;
+    border: 2px dashed #0073aa;
+    visibility: visible !important;
+}
+
+.cdc-drag-handle {
+    margin-right: 12px;
+    color: #999;
+    cursor: grab;
+}
+
+.cdc-drag-handle:hover {
+    color: #0073aa;
+}
+
+.cdc-item-icon {
+    margin-right: 10px;
+    color: #50575e;
+}
+
+.cdc-item-icon .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.cdc-item-name {
+    flex: 1;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.cdc-order-actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cdc-order-actions .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cdc-order-actions .button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ===========================================
+   9. Preview Panel
+   =========================================== */
+
+.cdc-preview-panel {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.cdc-preview-panel h3 {
+    margin-top: 0;
+}
+
+.cdc-sidebar-preview {
+    background: #1d2327;
+    border-radius: 4px;
+    padding: 10px 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.cdc-preview-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    color: #f0f0f1;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.cdc-preview-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.cdc-preview-item .dashicons {
+    margin-right: 10px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+}
+
+/* ===========================================
+   10. Status Messages
+   =========================================== */
+
+.cdc-status-message {
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: none;
+}
+
+.cdc-status-message.success {
+    display: inline-block;
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.cdc-status-message.error {
+    display: inline-block;
+    background: #f8d7da;
+    color: #842029;
+}
+
+.cdc-status-message.loading {
+    display: inline-block;
+    background: #cfe2ff;
+    color: #084298;
+}
+
+/* ===========================================
+   11. Scrollbar Styling
+   =========================================== */
+
+.cdc-menu-list::-webkit-scrollbar,
+.cdc-sortable-list::-webkit-scrollbar,
+.cdc-sidebar-preview::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cdc-menu-list::-webkit-scrollbar-track,
+.cdc-sortable-list::-webkit-scrollbar-track,
+.cdc-sidebar-preview::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.cdc-menu-list::-webkit-scrollbar-thumb,
+.cdc-sortable-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.cdc-sidebar-preview::-webkit-scrollbar-thumb {
+    background: #50575e;
+    border-radius: 3px;
+}
+
+/* ===========================================
+   12. Admin Bar Tab Styles (NEW v1.4.1)
+   =========================================== */
+
+/* Frontend Admin Bar Table */
+.cdc-frontend-table {
+    background: #fff;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 600px;
+}
+
+.cdc-frontend-table th,
+.cdc-frontend-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cdc-frontend-table thead th {
+    background: #f6f7f7;
+    font-weight: 600;
+}
+
+/* Toggle Switch */
+.cdc-toggle-switch {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.cdc-toggle-switch input[type="checkbox"] {
+    display: none;
+}
+
+.cdc-toggle-slider {
+    width: 44px;
+    height: 24px;
+    background: #ccc;
+    border-radius: 12px;
+    position: relative;
+    transition: background 0.3s ease;
+    margin-right: 10px;
+}
+
+.cdc-toggle-slider:before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.cdc-toggle-switch input:checked + .cdc-toggle-slider {
+    background: #dc3545;
+}
+
+.cdc-toggle-switch input:checked + .cdc-toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.cdc-toggle-label {
+    font-size: 13px;
+    color: #50575e;
+}
+
+/* Custom Item Form */
+.cdc-custom-item-form {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.cdc-custom-item-form h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.cdc-custom-item-form .form-table th {
+    width: 150px;
+    padding: 10px 10px 10px 0;
+}
+
+.cdc-custom-item-form .form-table td {
+    padding: 10px 0;
+}
+
+/* Role Checkboxes Grid */
+.cdc-role-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.cdc-role-checkboxes label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff;
+    padding: 5px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cdc-role-checkboxes label:hover {
+    border-color: #0073aa;
+    background: #f0f6fc;
+}
+
+/* Custom Items List Table */
+.cdc-custom-items-list {
+    margin-top: 30px;
+}
+
+.cdc-custom-items-list h3 {
+    margin-bottom: 15px;
+}
+
+.cdc-custom-items-list .wp-list-table {
+    border: 1px solid #c3c4c7;
+}
+
+.cdc-custom-items-list .wp-list-table th,
+.cdc-custom-items-list .wp-list-table td {
+    padding: 10px 12px;
+}
+
+.cdc-delete-custom-item {
+    color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+.cdc-delete-custom-item:hover {
+    background: #dc3545 !important;
+    color: #fff !important;
+}
+
+.cdc-delete-custom-item .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-right: 3px;
+}
+
+/* ===========================================
+   13. Dashboard Widgets Tab Styles (NEW v1.4.2)
+   =========================================== */
+
+/* Widget Form */
+.cdc-widget-form {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.cdc-widget-form .form-table th {
+    width: 150px;
+    padding: 15px 10px 15px 0;
+}
+
+.cdc-widget-form .form-table td {
+    padding: 15px 0;
+}
+
+.cdc-widget-form .required {
+    color: #dc3545;
+}
+
+.cdc-widget-form textarea.code {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+}
+
+/* Widgets Table */
+.cdc-widgets-table {
+    border: 1px solid #c3c4c7;
+    margin-top: 15px;
+}
+
+.cdc-widgets-table th,
+.cdc-widgets-table td {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+.cdc-widgets-table .row-actions {
+    color: #787c82;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.cdc-shortcode-preview {
+    background: #f0f0f1;
+    padding: 5px 10px;
+    border-radius: 3px;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.cdc-all-roles {
+    background: #d1e7dd;
+    color: #0f5132;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.cdc-delete-widget {
+    color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+.cdc-delete-widget:hover {
+    background: #dc3545 !important;
+    color: #fff !important;
+}
+
+.cdc-delete-widget .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-right: 3px;
+}
+
+/* Edit Widget Button */
+.cdc-edit-widget {
+    color: #0073aa !important;
+    border-color: #0073aa !important;
+    margin-right: 5px !important;
+}
+
+.cdc-edit-widget:hover {
+    background: #0073aa !important;
+    color: #fff !important;
+}
+
+.cdc-edit-widget .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-right: 3px;
+}
+
+/* Form in Edit Mode */
+.cdc-widget-form.edit-mode {
+    border-color: #0073aa;
+    background: #f0f6fc;
+}
+
+/* Shortcode Available Section */
+.cdc-shortcode-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.cdc-shortcode-group {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cdc-shortcode-group h4 {
+    margin: 0;
+    padding: 12px 15px;
+    background: #f6f7f7;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cdc-shortcode-group h4 .dashicons {
+    color: #0073aa;
+}
+
+.cdc-shortcode-list {
+    padding: 10px;
+}
+
+.cdc-shortcode-item {
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.cdc-shortcode-item:last-child {
+    margin-bottom: 0;
+}
+
+.cdc-shortcode-item:hover {
+    background: #e8f4fc;
+    border-color: #0073aa;
+}
+
+.cdc-shortcode-name {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #1d2327;
+}
+
+.cdc-shortcode-code {
+    display: block;
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    word-break: break-all;
+}
+
+.cdc-copy-hint {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 11px;
+    color: #0073aa;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.cdc-shortcode-item:hover .cdc-copy-hint {
+    opacity: 1;
+}
+
+.cdc-shortcode-item.copied {
+    background: #d1e7dd;
+    border-color: #198754;
+}
+
+.cdc-shortcode-item.copied .cdc-copy-hint {
+    opacity: 1;
+    color: #198754;
+}
+
+/* Help Grid */
+.cdc-help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.cdc-help-item {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.cdc-help-item h4 {
+    margin: 0 0 10px 0;
+    color: #1d2327;
+}
+
+.cdc-help-item code {
+    display: block;
+    background: #fff;
+    padding: 8px 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+}
+
+.cdc-help-item p {
+    margin: 0;
+    color: #646970;
+    font-size: 13px;
+}
+
+/* Dashboard Widget Styles (Frontend) */
+.cdc-widget-content {
+    padding: 5px 0;
+}
+
+.cdc-widget-empty,
+.cdc-widget-error {
+    color: #787c82;
+    font-style: italic;
+}
+
+.cdc-widget-error {
+    color: #dc3545;
+}
+
+.cdc-widget-refresh-time {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    color: #787c82;
+}
+
+.cdc-shortcode-output {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* ===========================================
+   14. Responsive Styles
+   =========================================== */
+
+@media (max-width: 1200px) {
+    .cdc-order-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .cdc-preview-panel {
+        order: -1;
+    }
+}
+
+@media (max-width: 782px) {
+    .cdc-roles-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cdc-submenu-selector {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .cdc-select {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .cdc-nav-tabs .nav-tab {
+        display: block;
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+    
+    .cdc-role-checkboxes {
+        flex-direction: column;
+    }
+    
+    .cdc-frontend-table {
+        font-size: 13px;
+    }
+}
