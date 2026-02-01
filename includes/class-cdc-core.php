@@ -1,14 +1,15 @@
 <?php
 /**
  * Core class - Initializes all plugin components
- * 
+ *
  * This class serves as the main controller that:
  * - Initializes all feature classes
  * - Enqueues admin assets (CSS/JS)
  * - Sets up common hooks used across the plugin
- * 
+ *
  * @package CustomDashboardController
  * @since 1.0.0
+ * @updated 1.6.0
  */
 
 if (!defined('ABSPATH')) {
@@ -29,12 +30,13 @@ class CDC_Core {
         new CDC_Submenu_Order();        // Handles submenu reordering (NEW v1.4.0)
         new CDC_Admin_Bar();            // Handles admin bar customization (NEW v1.4.1)
         new CDC_Dashboard_Widgets();    // Handles custom dashboard widgets (NEW v1.4.2)
+        new CDC_Login_Branding();       // Handles login page branding (NEW v1.5.2)
         new CDC_Settings();             // Handles settings pages with tabs
         
         // Enqueue admin assets
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
     }
-    
+
     /**
      * Enqueue admin CSS and JavaScript files
      * 

@@ -1,14 +1,16 @@
 <?php
 /**
  * Menu Visibility class - Handles hiding parent menus per user role
- * 
+ *
  * This class manages:
  * - Capturing original menu list before modifications
  * - Hiding menus based on user role settings
  * - Providing menu data for settings page display
- * 
+ * - Protecting Dashboard Controller menu for administrators
+ *
  * @package CustomDashboardController
  * @since 1.0.0
+ * @updated 1.6.0 - Added protection for Dashboard Controller menu (admin role)
  */
 
 if (!defined('ABSPATH')) {
@@ -110,27 +112,60 @@ class CDC_Menu_Visibility {
     
     /**
      * Hide menus based on saved settings for current user role
+     *
+     * IMPORTANT: Dashboard Controller menu is protected for administrators
+     * to prevent accidental lockout from plugin settings.
      */
     public function hide_menus() {
         $hidden_menus = get_option('cdc_menu_visibility', array());
-        
+
         // Exit if no menus are hidden
         if (empty($hidden_menus)) {
             return;
         }
-        
+
         // Get current user's roles
         $current_user = wp_get_current_user();
         $user_roles = $current_user->roles;
-        
+
+        // Check if user is administrator
+        $is_admin = in_array('administrator', $user_roles);
+
         // Remove menus for each role the user has
         foreach ($user_roles as $role) {
             if (isset($hidden_menus[$role]) && is_array($hidden_menus[$role])) {
                 foreach ($hidden_menus[$role] as $menu_slug) {
+                    // PROTECTION: Never hide Dashboard Controller for administrators
+                    if ($is_admin && $menu_slug === 'dashboard-controller') {
+                        continue;
+                    }
                     remove_menu_page($menu_slug);
                 }
             }
         }
+    }
+
+    /**
+     * Get protected menu slugs that cannot be hidden for administrators
+     *
+     * @return array Array of protected menu slugs
+     */
+    public static function get_protected_menus() {
+        return array('dashboard-controller');
+    }
+
+    /**
+     * Check if a menu is protected for a specific role
+     *
+     * @param string $menu_slug The menu slug to check
+     * @param string $role The role to check for
+     * @return bool True if protected, false otherwise
+     */
+    public static function is_menu_protected($menu_slug, $role) {
+        if ($role === 'administrator' && in_array($menu_slug, self::get_protected_menus())) {
+            return true;
+        }
+        return false;
     }
     
     /**

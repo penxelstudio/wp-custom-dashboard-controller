@@ -1,13 +1,13 @@
 <?php
 /**
  * Uninstall script - Removes all plugin data when plugin is deleted
- * 
+ *
  * This file runs when the plugin is uninstalled (deleted) from WordPress.
  * It removes all options created by the plugin to clean up the database.
- * 
+ *
  * @package CustomDashboardController
  * @since 1.0.0
- * @updated 1.4.2
+ * @updated 1.6.0
  */
 
 // Exit if not called by WordPress uninstall
@@ -25,6 +25,7 @@ delete_option('cdc_adminbar_visibility');
 delete_option('cdc_adminbar_frontend');
 delete_option('cdc_adminbar_custom_items');
 delete_option('cdc_dashboard_widgets');
+delete_option('cdc_login_settings');
 
 // Clean up any transients for dashboard widgets
 global $wpdb;

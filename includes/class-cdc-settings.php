@@ -1,21 +1,25 @@
 <?php
 /**
  * Settings class - Handles admin settings pages with tabbed interface
- * 
+ *
  * UPDATED in v1.4.0 - New tabbed interface
  * UPDATED in v1.4.1 - Added Admin Bar tab
  * UPDATED in v1.4.2 - Added Dashboard Widgets tab
- * 
+ * UPDATED in v1.5.2 - Added Login Page Branding tab
+ * UPDATED in v1.6.0 - Added Tools tab (Preset Schemes, Import/Export, Reset)
+ *
  * Tab Structure:
- * - Tab 1: Basic Settings (Colors, Logo)
+ * - Tab 1: Basic Settings (Colors, Logo, Preset Color Schemes)
  * - Tab 2: Menu Visibility (Parent menus, Submenus)
  * - Tab 3: Menu Order (Parent menus, Submenus)
  * - Tab 4: Admin Bar (Visibility, Frontend, Custom Items)
  * - Tab 5: Dashboard Widgets (Shortcode widgets)
- * 
+ * - Tab 6: Login Page (Logo, Background, Layout)
+ * - Tab 7: Tools (Import/Export, Reset to Default)
+ *
  * @package CustomDashboardController
  * @since 1.0.0
- * @updated 1.4.2
+ * @updated 1.6.0
  */
 
 if (!defined('ABSPATH')) {
@@ -40,11 +44,19 @@ class CDC_Settings {
             'visibility' => __('Menu Visibility', 'custom-dashboard-controller'),
             'order'      => __('Menu Order', 'custom-dashboard-controller'),
             'adminbar'   => __('Admin Bar', 'custom-dashboard-controller'),
-            'widgets'    => __('Dashboard Widgets', 'custom-dashboard-controller')
+            'widgets'    => __('Dashboard Widgets', 'custom-dashboard-controller'),
+            'login'      => __('Login Page', 'custom-dashboard-controller'),
+            'tools'      => __('Tools', 'custom-dashboard-controller')
         );
-        
+
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
+
+        // AJAX handlers for v1.6.0 features
+        add_action('wp_ajax_cdc_apply_color_scheme', array($this, 'ajax_apply_color_scheme'));
+        add_action('wp_ajax_cdc_export_settings', array($this, 'ajax_export_settings'));
+        add_action('wp_ajax_cdc_import_settings', array($this, 'ajax_import_settings'));
+        add_action('wp_ajax_cdc_reset_all_settings', array($this, 'ajax_reset_all_settings'));
     }
     
     /**
@@ -90,6 +102,152 @@ class CDC_Settings {
         register_setting('cdc_adminbar_settings', 'cdc_adminbar_frontend', array(
             'sanitize_callback' => array($this, 'sanitize_adminbar_frontend')
         ));
+
+        // Login page branding settings (NEW v1.5.2)
+        register_setting('cdc_login_settings', 'cdc_login_settings', array(
+            'sanitize_callback' => array($this, 'sanitize_login_settings')
+        ));
+    }
+
+    /**
+     * Sanitize login page settings (NEW v1.5.2)
+     */
+    public function sanitize_login_settings($input) {
+        $sanitized = array();
+
+        // Logo settings
+        $sanitized['custom_logo'] = isset($input['custom_logo'])
+            ? esc_url_raw($input['custom_logo'])
+            : '';
+
+        $sanitized['logo_width'] = isset($input['logo_width'])
+            ? absint($input['logo_width'])
+            : 320;
+
+        $sanitized['logo_height'] = isset($input['logo_height'])
+            ? absint($input['logo_height'])
+            : 80;
+
+        $sanitized['logo_url'] = isset($input['logo_url'])
+            ? esc_url_raw($input['logo_url'])
+            : '';
+
+        // Layout settings
+        $valid_layouts = array('center', 'two-column-left', 'two-column-right');
+        $sanitized['layout_style'] = isset($input['layout_style']) && in_array($input['layout_style'], $valid_layouts)
+            ? $input['layout_style']
+            : 'center';
+
+        // Background settings
+        $valid_bg_types = array('color', 'image', 'gradient');
+        $sanitized['bg_type'] = isset($input['bg_type']) && in_array($input['bg_type'], $valid_bg_types)
+            ? $input['bg_type']
+            : 'color';
+
+        $sanitized['bg_color'] = isset($input['bg_color'])
+            ? sanitize_hex_color($input['bg_color'])
+            : '#f0f0f1';
+
+        $sanitized['bg_image'] = isset($input['bg_image'])
+            ? esc_url_raw($input['bg_image'])
+            : '';
+
+        $valid_bg_sizes = array('cover', 'contain', 'auto');
+        $sanitized['bg_size'] = isset($input['bg_size']) && in_array($input['bg_size'], $valid_bg_sizes)
+            ? $input['bg_size']
+            : 'cover';
+
+        $sanitized['bg_position'] = isset($input['bg_position'])
+            ? sanitize_text_field($input['bg_position'])
+            : 'center center';
+
+        $valid_bg_repeats = array('no-repeat', 'repeat', 'repeat-x', 'repeat-y');
+        $sanitized['bg_repeat'] = isset($input['bg_repeat']) && in_array($input['bg_repeat'], $valid_bg_repeats)
+            ? $input['bg_repeat']
+            : 'no-repeat';
+
+        $sanitized['bg_gradient_start'] = isset($input['bg_gradient_start'])
+            ? sanitize_hex_color($input['bg_gradient_start'])
+            : '#667eea';
+
+        $sanitized['bg_gradient_end'] = isset($input['bg_gradient_end'])
+            ? sanitize_hex_color($input['bg_gradient_end'])
+            : '#764ba2';
+
+        $sanitized['bg_gradient_direction'] = isset($input['bg_gradient_direction'])
+            ? sanitize_text_field($input['bg_gradient_direction'])
+            : '135deg';
+
+        // Form styling
+        $sanitized['form_bg_color'] = isset($input['form_bg_color'])
+            ? sanitize_hex_color($input['form_bg_color'])
+            : '#ffffff';
+
+        $sanitized['form_text_color'] = isset($input['form_text_color'])
+            ? sanitize_hex_color($input['form_text_color'])
+            : '#3c434a';
+
+        $sanitized['form_border_radius'] = isset($input['form_border_radius'])
+            ? absint($input['form_border_radius'])
+            : 4;
+
+        $sanitized['form_shadow'] = isset($input['form_shadow']) && $input['form_shadow'] === 'yes'
+            ? 'yes'
+            : 'no';
+
+        // Button styling
+        $sanitized['button_bg_color'] = isset($input['button_bg_color'])
+            ? sanitize_hex_color($input['button_bg_color'])
+            : '#2271b1';
+
+        $sanitized['button_text_color'] = isset($input['button_text_color'])
+            ? sanitize_hex_color($input['button_text_color'])
+            : '#ffffff';
+
+        $sanitized['button_hover_bg'] = isset($input['button_hover_bg'])
+            ? sanitize_hex_color($input['button_hover_bg'])
+            : '#135e96';
+
+        $sanitized['button_hover_text'] = isset($input['button_hover_text'])
+            ? sanitize_hex_color($input['button_hover_text'])
+            : '#ffffff';
+
+        $sanitized['button_border_radius'] = isset($input['button_border_radius'])
+            ? absint($input['button_border_radius'])
+            : 3;
+
+        // Link styling
+        $sanitized['link_color'] = isset($input['link_color'])
+            ? sanitize_hex_color($input['link_color'])
+            : '#50575e';
+
+        $sanitized['link_hover_color'] = isset($input['link_hover_color'])
+            ? sanitize_hex_color($input['link_hover_color'])
+            : '#135e96';
+
+        // Two-column settings
+        $sanitized['column_bg_color'] = isset($input['column_bg_color'])
+            ? sanitize_hex_color($input['column_bg_color'])
+            : '#ffffff';
+
+        $sanitized['column_image'] = isset($input['column_image'])
+            ? esc_url_raw($input['column_image'])
+            : '';
+
+        $sanitized['column_overlay'] = isset($input['column_overlay']) && $input['column_overlay'] === 'yes'
+            ? 'yes'
+            : 'no';
+
+        $sanitized['column_overlay_color'] = isset($input['column_overlay_color'])
+            ? sanitize_text_field($input['column_overlay_color'])
+            : 'rgba(0,0,0,0.3)';
+
+        // Custom CSS
+        $sanitized['custom_css'] = isset($input['custom_css'])
+            ? wp_strip_all_tags($input['custom_css'])
+            : '';
+
+        return $sanitized;
     }
     
     /**
@@ -301,6 +459,12 @@ class CDC_Settings {
                     case 'widgets':
                         $this->render_widgets_tab();
                         break;
+                    case 'login':
+                        $this->render_login_tab();
+                        break;
+                    case 'tools':
+                        $this->render_tools_tab();
+                        break;
                     default:
                         $this->render_basic_tab();
                         break;
@@ -335,7 +499,37 @@ class CDC_Settings {
         ?>
         <form method="post" action="options.php">
             <?php settings_fields('cdc_basic_settings'); ?>
-            
+
+            <!-- Preset Color Schemes Section (Quick Start) -->
+            <div class="cdc-settings-section">
+                <h2><?php _e('Preset Color Schemes', 'custom-dashboard-controller'); ?></h2>
+
+                <div class="cdc-info-box cdc-info-blue">
+                    <span class="dashicons dashicons-admin-appearance"></span>
+                    <div>
+                        <strong><?php _e('Quick Start:', 'custom-dashboard-controller'); ?></strong>
+                        <?php _e('Choose a pre-built color theme for your admin sidebar. Click to apply instantly.', 'custom-dashboard-controller'); ?>
+                    </div>
+                </div>
+
+                <?php $schemes = self::get_color_schemes(); ?>
+                <div class="cdc-color-schemes-grid">
+                    <?php foreach ($schemes as $scheme_id => $scheme): ?>
+                        <div class="cdc-scheme-card" data-scheme="<?php echo esc_attr($scheme_id); ?>">
+                            <div class="cdc-scheme-preview" style="background-color: <?php echo esc_attr($scheme['preview']); ?>;">
+                                <div class="cdc-scheme-preview-item" style="background-color: <?php echo esc_attr($scheme['colors']['active_bg_color']); ?>;"></div>
+                                <div class="cdc-scheme-preview-item" style="background-color: <?php echo esc_attr($scheme['colors']['hover_bg_color']); ?>;"></div>
+                            </div>
+                            <div class="cdc-scheme-name"><?php echo esc_html($scheme['name']); ?></div>
+                            <button type="button" class="button button-small cdc-apply-scheme" data-scheme="<?php echo esc_attr($scheme_id); ?>">
+                                <?php _e('Apply', 'custom-dashboard-controller'); ?>
+                            </button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <span id="cdc-scheme-status" class="cdc-status-message"></span>
+            </div>
+
             <!-- Color Settings Section -->
             <div class="cdc-settings-section">
                 <h2><?php _e('Color Settings', 'custom-dashboard-controller'); ?></h2>
@@ -570,12 +764,12 @@ class CDC_Settings {
                     </tr>
                 </table>
             </div>
-            
+
             <?php submit_button(__('Save Settings', 'custom-dashboard-controller')); ?>
         </form>
         <?php
     }
-    
+
     /**
      * Render Menu Visibility tab
      */
@@ -599,6 +793,14 @@ class CDC_Settings {
                     <div>
                         <strong><?php _e('How it works:', 'custom-dashboard-controller'); ?></strong>
                         <?php _e('Check the boxes to HIDE menus. Checked = Hidden, Unchecked = Visible.', 'custom-dashboard-controller'); ?>
+                    </div>
+                </div>
+
+                <div class="cdc-info-box cdc-info-orange">
+                    <span class="dashicons dashicons-lock"></span>
+                    <div>
+                        <strong><?php _e('Protection:', 'custom-dashboard-controller'); ?></strong>
+                        <?php _e('Dashboard Controller menu cannot be hidden for Administrators to prevent accidental lockout. Items marked with 🔒 are protected.', 'custom-dashboard-controller'); ?>
                     </div>
                 </div>
                 
@@ -627,15 +829,20 @@ class CDC_Settings {
                                 <?php foreach ($menus as $menu_item): ?>
                                     <?php
                                     $is_hidden = in_array($menu_item['slug'], $role_hidden);
+                                    $is_protected = CDC_Menu_Visibility::is_menu_protected($menu_item['slug'], $role_slug);
                                     $card_class = $is_hidden ? 'cdc-menu-item cdc-hidden' : 'cdc-menu-item';
+                                    if ($is_protected) {
+                                        $card_class .= ' cdc-protected';
+                                    }
                                     ?>
-                                    <label class="<?php echo esc_attr($card_class); ?>">
-                                        <input type="checkbox" 
-                                               name="cdc_menu_visibility[<?php echo esc_attr($role_slug); ?>][]" 
+                                    <label class="<?php echo esc_attr($card_class); ?>" <?php echo $is_protected ? 'title="' . esc_attr__('Protected: Cannot be hidden for Administrators', 'custom-dashboard-controller') . '"' : ''; ?>>
+                                        <input type="checkbox"
+                                               name="cdc_menu_visibility[<?php echo esc_attr($role_slug); ?>][]"
                                                value="<?php echo esc_attr($menu_item['slug']); ?>"
-                                               <?php checked($is_hidden); ?>>
+                                               <?php checked($is_hidden && !$is_protected); ?>
+                                               <?php disabled($is_protected); ?>>
                                         <span class="cdc-menu-name"><?php echo esc_html($menu_item['name']); ?></span>
-                                        <span class="cdc-menu-status"><?php echo $is_hidden ? '🚫' : '✅'; ?></span>
+                                        <span class="cdc-menu-status"><?php echo $is_protected ? '🔒' : ($is_hidden ? '🚫' : '✅'); ?></span>
                                     </label>
                                 <?php endforeach; ?>
                             </div>
@@ -1263,5 +1470,959 @@ class CDC_Settings {
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * Render Login Page Branding tab (NEW v1.5.2)
+     */
+    private function render_login_tab() {
+        $login_branding = new CDC_Login_Branding();
+        $defaults = $login_branding->get_defaults();
+        $settings = get_option('cdc_login_settings', $defaults);
+        $settings = wp_parse_args($settings, $defaults);
+
+        ?>
+        <form method="post" action="options.php" id="cdc-login-form">
+            <?php settings_fields('cdc_login_settings'); ?>
+
+            <!-- Layout Style Section -->
+            <div class="cdc-settings-section">
+                <h2><?php _e('Layout Style', 'custom-dashboard-controller'); ?></h2>
+
+                <div class="cdc-info-box cdc-info-blue">
+                    <span class="dashicons dashicons-info"></span>
+                    <div>
+                        <strong><?php _e('New in v1.5.2:', 'custom-dashboard-controller'); ?></strong>
+                        <?php _e('Customize your WordPress login page with custom logo, colors, background, and layout styles.', 'custom-dashboard-controller'); ?>
+                    </div>
+                </div>
+
+                <div class="cdc-layout-selector">
+                    <label class="cdc-layout-option <?php echo $settings['layout_style'] === 'center' ? 'active' : ''; ?>">
+                        <input type="radio" name="cdc_login_settings[layout_style]" value="center" <?php checked($settings['layout_style'], 'center'); ?>>
+                        <div class="cdc-layout-preview cdc-layout-center-preview">
+                            <div class="cdc-layout-form-box"></div>
+                        </div>
+                        <span class="cdc-layout-label"><?php _e('Center', 'custom-dashboard-controller'); ?></span>
+                    </label>
+
+                    <label class="cdc-layout-option <?php echo $settings['layout_style'] === 'two-column-left' ? 'active' : ''; ?>">
+                        <input type="radio" name="cdc_login_settings[layout_style]" value="two-column-left" <?php checked($settings['layout_style'], 'two-column-left'); ?>>
+                        <div class="cdc-layout-preview cdc-layout-two-col-preview">
+                            <div class="cdc-layout-col cdc-layout-form-col"></div>
+                            <div class="cdc-layout-col cdc-layout-image-col"></div>
+                        </div>
+                        <span class="cdc-layout-label"><?php _e('Two Column (Form Left)', 'custom-dashboard-controller'); ?></span>
+                    </label>
+
+                    <label class="cdc-layout-option <?php echo $settings['layout_style'] === 'two-column-right' ? 'active' : ''; ?>">
+                        <input type="radio" name="cdc_login_settings[layout_style]" value="two-column-right" <?php checked($settings['layout_style'], 'two-column-right'); ?>>
+                        <div class="cdc-layout-preview cdc-layout-two-col-preview">
+                            <div class="cdc-layout-col cdc-layout-image-col"></div>
+                            <div class="cdc-layout-col cdc-layout-form-col"></div>
+                        </div>
+                        <span class="cdc-layout-label"><?php _e('Two Column (Form Right)', 'custom-dashboard-controller'); ?></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Logo Settings Section -->
+            <div class="cdc-settings-section">
+                <h2><?php _e('Login Logo', 'custom-dashboard-controller'); ?></h2>
+                <p class="description"><?php _e('Replace the default WordPress logo on the login page.', 'custom-dashboard-controller'); ?></p>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label><?php _e('Custom Logo', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <div class="cdc-logo-upload">
+                                <input type="hidden"
+                                       name="cdc_login_settings[custom_logo]"
+                                       id="cdc_login_logo"
+                                       value="<?php echo esc_attr($settings['custom_logo']); ?>">
+
+                                <div class="cdc-logo-preview" id="cdc_login_logo_preview">
+                                    <?php if (!empty($settings['custom_logo'])): ?>
+                                        <img src="<?php echo esc_url($settings['custom_logo']); ?>" alt="Logo">
+                                    <?php else: ?>
+                                        <span class="cdc-no-logo"><?php _e('No logo selected', 'custom-dashboard-controller'); ?></span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <button type="button" class="button button-secondary" id="cdc_upload_login_logo">
+                                    <span class="dashicons dashicons-upload"></span>
+                                    <?php _e('Upload Logo', 'custom-dashboard-controller'); ?>
+                                </button>
+
+                                <button type="button"
+                                        class="button button-secondary"
+                                        id="cdc_remove_login_logo"
+                                        <?php echo empty($settings['custom_logo']) ? 'style="display:none;"' : ''; ?>>
+                                    <span class="dashicons dashicons-trash"></span>
+                                    <?php _e('Remove', 'custom-dashboard-controller'); ?>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_logo_width"><?php _e('Logo Width (px)', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="number"
+                                   id="login_logo_width"
+                                   name="cdc_login_settings[logo_width]"
+                                   value="<?php echo esc_attr($settings['logo_width']); ?>"
+                                   class="small-text"
+                                   min="50"
+                                   max="500">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_logo_height"><?php _e('Logo Height (px)', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="number"
+                                   id="login_logo_height"
+                                   name="cdc_login_settings[logo_height]"
+                                   value="<?php echo esc_attr($settings['logo_height']); ?>"
+                                   class="small-text"
+                                   min="30"
+                                   max="300">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_logo_url"><?php _e('Logo Link URL', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="url"
+                                   id="login_logo_url"
+                                   name="cdc_login_settings[logo_url]"
+                                   value="<?php echo esc_attr($settings['logo_url']); ?>"
+                                   class="regular-text"
+                                   placeholder="<?php echo esc_attr(home_url('/')); ?>">
+                            <p class="description"><?php _e('URL when clicking the logo. Leave empty to use site homepage.', 'custom-dashboard-controller'); ?></p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Background Settings Section -->
+            <div class="cdc-settings-section">
+                <h2><?php _e('Background Settings', 'custom-dashboard-controller'); ?></h2>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php _e('Background Type', 'custom-dashboard-controller'); ?></th>
+                        <td>
+                            <fieldset class="cdc-bg-type-selector">
+                                <label class="cdc-radio-card <?php echo $settings['bg_type'] === 'color' ? 'active' : ''; ?>">
+                                    <input type="radio" name="cdc_login_settings[bg_type]" value="color" <?php checked($settings['bg_type'], 'color'); ?>>
+                                    <span class="dashicons dashicons-art"></span>
+                                    <span><?php _e('Solid Color', 'custom-dashboard-controller'); ?></span>
+                                </label>
+                                <label class="cdc-radio-card <?php echo $settings['bg_type'] === 'image' ? 'active' : ''; ?>">
+                                    <input type="radio" name="cdc_login_settings[bg_type]" value="image" <?php checked($settings['bg_type'], 'image'); ?>>
+                                    <span class="dashicons dashicons-format-image"></span>
+                                    <span><?php _e('Image', 'custom-dashboard-controller'); ?></span>
+                                </label>
+                                <label class="cdc-radio-card <?php echo $settings['bg_type'] === 'gradient' ? 'active' : ''; ?>">
+                                    <input type="radio" name="cdc_login_settings[bg_type]" value="gradient" <?php checked($settings['bg_type'], 'gradient'); ?>>
+                                    <span class="dashicons dashicons-image-rotate"></span>
+                                    <span><?php _e('Gradient', 'custom-dashboard-controller'); ?></span>
+                                </label>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Solid Color Options -->
+                <div class="cdc-bg-options cdc-bg-color-options" <?php echo $settings['bg_type'] !== 'color' ? 'style="display:none;"' : ''; ?>>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row">
+                                <label for="login_bg_color"><?php _e('Background Color', 'custom-dashboard-controller'); ?></label>
+                            </th>
+                            <td>
+                                <input type="color"
+                                       id="login_bg_color"
+                                       name="cdc_login_settings[bg_color]"
+                                       value="<?php echo esc_attr($settings['bg_color']); ?>"
+                                       class="cdc-color-picker">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Image Options -->
+                <div class="cdc-bg-options cdc-bg-image-options" <?php echo $settings['bg_type'] !== 'image' ? 'style="display:none;"' : ''; ?>>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row">
+                                <label><?php _e('Background Image', 'custom-dashboard-controller'); ?></label>
+                            </th>
+                            <td>
+                                <div class="cdc-image-upload">
+                                    <input type="hidden"
+                                           name="cdc_login_settings[bg_image]"
+                                           id="cdc_login_bg_image"
+                                           value="<?php echo esc_attr($settings['bg_image']); ?>">
+
+                                    <div class="cdc-image-preview" id="cdc_login_bg_preview">
+                                        <?php if (!empty($settings['bg_image'])): ?>
+                                            <img src="<?php echo esc_url($settings['bg_image']); ?>" alt="Background">
+                                        <?php else: ?>
+                                            <span class="cdc-no-image"><?php _e('No image selected', 'custom-dashboard-controller'); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <button type="button" class="button button-secondary" id="cdc_upload_login_bg">
+                                        <span class="dashicons dashicons-upload"></span>
+                                        <?php _e('Upload Image', 'custom-dashboard-controller'); ?>
+                                    </button>
+
+                                    <button type="button"
+                                            class="button button-secondary"
+                                            id="cdc_remove_login_bg"
+                                            <?php echo empty($settings['bg_image']) ? 'style="display:none;"' : ''; ?>>
+                                        <span class="dashicons dashicons-trash"></span>
+                                        <?php _e('Remove', 'custom-dashboard-controller'); ?>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="login_bg_size"><?php _e('Background Size', 'custom-dashboard-controller'); ?></label>
+                            </th>
+                            <td>
+                                <select id="login_bg_size" name="cdc_login_settings[bg_size]">
+                                    <option value="cover" <?php selected($settings['bg_size'], 'cover'); ?>><?php _e('Cover', 'custom-dashboard-controller'); ?></option>
+                                    <option value="contain" <?php selected($settings['bg_size'], 'contain'); ?>><?php _e('Contain', 'custom-dashboard-controller'); ?></option>
+                                    <option value="auto" <?php selected($settings['bg_size'], 'auto'); ?>><?php _e('Auto', 'custom-dashboard-controller'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="login_bg_position"><?php _e('Background Position', 'custom-dashboard-controller'); ?></label>
+                            </th>
+                            <td>
+                                <select id="login_bg_position" name="cdc_login_settings[bg_position]">
+                                    <option value="center center" <?php selected($settings['bg_position'], 'center center'); ?>><?php _e('Center', 'custom-dashboard-controller'); ?></option>
+                                    <option value="top center" <?php selected($settings['bg_position'], 'top center'); ?>><?php _e('Top Center', 'custom-dashboard-controller'); ?></option>
+                                    <option value="bottom center" <?php selected($settings['bg_position'], 'bottom center'); ?>><?php _e('Bottom Center', 'custom-dashboard-controller'); ?></option>
+                                    <option value="left center" <?php selected($settings['bg_position'], 'left center'); ?>><?php _e('Left Center', 'custom-dashboard-controller'); ?></option>
+                                    <option value="right center" <?php selected($settings['bg_position'], 'right center'); ?>><?php _e('Right Center', 'custom-dashboard-controller'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="login_bg_repeat"><?php _e('Background Repeat', 'custom-dashboard-controller'); ?></label>
+                            </th>
+                            <td>
+                                <select id="login_bg_repeat" name="cdc_login_settings[bg_repeat]">
+                                    <option value="no-repeat" <?php selected($settings['bg_repeat'], 'no-repeat'); ?>><?php _e('No Repeat', 'custom-dashboard-controller'); ?></option>
+                                    <option value="repeat" <?php selected($settings['bg_repeat'], 'repeat'); ?>><?php _e('Repeat', 'custom-dashboard-controller'); ?></option>
+                                    <option value="repeat-x" <?php selected($settings['bg_repeat'], 'repeat-x'); ?>><?php _e('Repeat Horizontally', 'custom-dashboard-controller'); ?></option>
+                                    <option value="repeat-y" <?php selected($settings['bg_repeat'], 'repeat-y'); ?>><?php _e('Repeat Vertically', 'custom-dashboard-controller'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Gradient Options -->
+                <div class="cdc-bg-options cdc-bg-gradient-options" <?php echo $settings['bg_type'] !== 'gradient' ? 'style="display:none;"' : ''; ?>>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row">
+                                <label for="login_gradient_start"><?php _e('Gradient Start Color', 'custom-dashboard-controller'); ?></label>
+                            </th>
+                            <td>
+                                <input type="color"
+                                       id="login_gradient_start"
+                                       name="cdc_login_settings[bg_gradient_start]"
+                                       value="<?php echo esc_attr($settings['bg_gradient_start']); ?>"
+                                       class="cdc-color-picker">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="login_gradient_end"><?php _e('Gradient End Color', 'custom-dashboard-controller'); ?></label>
+                            </th>
+                            <td>
+                                <input type="color"
+                                       id="login_gradient_end"
+                                       name="cdc_login_settings[bg_gradient_end]"
+                                       value="<?php echo esc_attr($settings['bg_gradient_end']); ?>"
+                                       class="cdc-color-picker">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="login_gradient_direction"><?php _e('Gradient Direction', 'custom-dashboard-controller'); ?></label>
+                            </th>
+                            <td>
+                                <select id="login_gradient_direction" name="cdc_login_settings[bg_gradient_direction]">
+                                    <option value="to right" <?php selected($settings['bg_gradient_direction'], 'to right'); ?>><?php _e('Left to Right', 'custom-dashboard-controller'); ?></option>
+                                    <option value="to left" <?php selected($settings['bg_gradient_direction'], 'to left'); ?>><?php _e('Right to Left', 'custom-dashboard-controller'); ?></option>
+                                    <option value="to bottom" <?php selected($settings['bg_gradient_direction'], 'to bottom'); ?>><?php _e('Top to Bottom', 'custom-dashboard-controller'); ?></option>
+                                    <option value="to top" <?php selected($settings['bg_gradient_direction'], 'to top'); ?>><?php _e('Bottom to Top', 'custom-dashboard-controller'); ?></option>
+                                    <option value="135deg" <?php selected($settings['bg_gradient_direction'], '135deg'); ?>><?php _e('Diagonal (135°)', 'custom-dashboard-controller'); ?></option>
+                                    <option value="45deg" <?php selected($settings['bg_gradient_direction'], '45deg'); ?>><?php _e('Diagonal (45°)', 'custom-dashboard-controller'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="cdc-gradient-preview" id="cdc-gradient-preview" style="background: linear-gradient(<?php echo esc_attr($settings['bg_gradient_direction']); ?>, <?php echo esc_attr($settings['bg_gradient_start']); ?>, <?php echo esc_attr($settings['bg_gradient_end']); ?>);"></div>
+                </div>
+            </div>
+
+            <!-- Two Column Settings (shown only for two-column layouts) -->
+            <div class="cdc-settings-section cdc-two-column-settings" <?php echo $settings['layout_style'] === 'center' ? 'style="display:none;"' : ''; ?>>
+                <h2><?php _e('Two Column Settings', 'custom-dashboard-controller'); ?></h2>
+                <p class="description"><?php _e('Configure the image/content column for two-column layouts.', 'custom-dashboard-controller'); ?></p>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="login_column_bg_color"><?php _e('Form Column Background', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_column_bg_color"
+                                   name="cdc_login_settings[column_bg_color]"
+                                   value="<?php echo esc_attr($settings['column_bg_color']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label><?php _e('Image Column Background', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <div class="cdc-image-upload">
+                                <input type="hidden"
+                                       name="cdc_login_settings[column_image]"
+                                       id="cdc_login_column_image"
+                                       value="<?php echo esc_attr($settings['column_image']); ?>">
+
+                                <div class="cdc-image-preview" id="cdc_login_column_preview">
+                                    <?php if (!empty($settings['column_image'])): ?>
+                                        <img src="<?php echo esc_url($settings['column_image']); ?>" alt="Column Background">
+                                    <?php else: ?>
+                                        <span class="cdc-no-image"><?php _e('No image selected', 'custom-dashboard-controller'); ?></span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <button type="button" class="button button-secondary" id="cdc_upload_column_image">
+                                    <span class="dashicons dashicons-upload"></span>
+                                    <?php _e('Upload Image', 'custom-dashboard-controller'); ?>
+                                </button>
+
+                                <button type="button"
+                                        class="button button-secondary"
+                                        id="cdc_remove_column_image"
+                                        <?php echo empty($settings['column_image']) ? 'style="display:none;"' : ''; ?>>
+                                    <span class="dashicons dashicons-trash"></span>
+                                    <?php _e('Remove', 'custom-dashboard-controller'); ?>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Image Overlay', 'custom-dashboard-controller'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox"
+                                       name="cdc_login_settings[column_overlay]"
+                                       value="yes"
+                                       <?php checked($settings['column_overlay'], 'yes'); ?>>
+                                <?php _e('Add dark overlay on image', 'custom-dashboard-controller'); ?>
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Form Styling Section -->
+            <div class="cdc-settings-section">
+                <h2><?php _e('Form Styling', 'custom-dashboard-controller'); ?></h2>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="login_form_bg_color"><?php _e('Form Background Color', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_form_bg_color"
+                                   name="cdc_login_settings[form_bg_color]"
+                                   value="<?php echo esc_attr($settings['form_bg_color']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_form_text_color"><?php _e('Form Text Color', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_form_text_color"
+                                   name="cdc_login_settings[form_text_color]"
+                                   value="<?php echo esc_attr($settings['form_text_color']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_form_border_radius"><?php _e('Form Border Radius (px)', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="number"
+                                   id="login_form_border_radius"
+                                   name="cdc_login_settings[form_border_radius]"
+                                   value="<?php echo esc_attr($settings['form_border_radius']); ?>"
+                                   class="small-text"
+                                   min="0"
+                                   max="50">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Form Shadow', 'custom-dashboard-controller'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox"
+                                       name="cdc_login_settings[form_shadow]"
+                                       value="yes"
+                                       <?php checked($settings['form_shadow'], 'yes'); ?>>
+                                <?php _e('Add shadow to login form', 'custom-dashboard-controller'); ?>
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Button Styling Section -->
+            <div class="cdc-settings-section">
+                <h2><?php _e('Button Styling', 'custom-dashboard-controller'); ?></h2>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="login_button_bg_color"><?php _e('Button Background Color', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_button_bg_color"
+                                   name="cdc_login_settings[button_bg_color]"
+                                   value="<?php echo esc_attr($settings['button_bg_color']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_button_text_color"><?php _e('Button Text Color', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_button_text_color"
+                                   name="cdc_login_settings[button_text_color]"
+                                   value="<?php echo esc_attr($settings['button_text_color']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_button_hover_bg"><?php _e('Button Hover Background', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_button_hover_bg"
+                                   name="cdc_login_settings[button_hover_bg]"
+                                   value="<?php echo esc_attr($settings['button_hover_bg']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_button_hover_text"><?php _e('Button Hover Text Color', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_button_hover_text"
+                                   name="cdc_login_settings[button_hover_text]"
+                                   value="<?php echo esc_attr($settings['button_hover_text']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_button_border_radius"><?php _e('Button Border Radius (px)', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="number"
+                                   id="login_button_border_radius"
+                                   name="cdc_login_settings[button_border_radius]"
+                                   value="<?php echo esc_attr($settings['button_border_radius']); ?>"
+                                   class="small-text"
+                                   min="0"
+                                   max="50">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Link Styling Section -->
+            <div class="cdc-settings-section">
+                <h2><?php _e('Link Styling', 'custom-dashboard-controller'); ?></h2>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="login_link_color"><?php _e('Link Color', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_link_color"
+                                   name="cdc_login_settings[link_color]"
+                                   value="<?php echo esc_attr($settings['link_color']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="login_link_hover_color"><?php _e('Link Hover Color', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <input type="color"
+                                   id="login_link_hover_color"
+                                   name="cdc_login_settings[link_hover_color]"
+                                   value="<?php echo esc_attr($settings['link_hover_color']); ?>"
+                                   class="cdc-color-picker">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Custom CSS Section -->
+            <div class="cdc-settings-section">
+                <h2><?php _e('Custom CSS', 'custom-dashboard-controller'); ?></h2>
+                <p class="description"><?php _e('Add your own CSS to further customize the login page.', 'custom-dashboard-controller'); ?></p>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="login_custom_css"><?php _e('Custom CSS', 'custom-dashboard-controller'); ?></label>
+                        </th>
+                        <td>
+                            <textarea id="login_custom_css"
+                                      name="cdc_login_settings[custom_css]"
+                                      class="large-text code"
+                                      rows="8"
+                                      placeholder="/* Your custom CSS here */"><?php echo esc_textarea($settings['custom_css']); ?></textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Preview Button -->
+            <div class="cdc-settings-section">
+                <a href="<?php echo esc_url(wp_login_url()); ?>" target="_blank" class="button button-secondary button-hero">
+                    <span class="dashicons dashicons-visibility"></span>
+                    <?php _e('Preview Login Page', 'custom-dashboard-controller'); ?>
+                </a>
+            </div>
+
+            <?php submit_button(__('Save Login Page Settings', 'custom-dashboard-controller')); ?>
+        </form>
+        <?php
+    }
+
+    /**
+     * Get preset color schemes (NEW v1.6.0)
+     *
+     * @return array
+     */
+    public static function get_color_schemes() {
+        return array(
+            'default' => array(
+                'name' => __('Default (Dark)', 'custom-dashboard-controller'),
+                'preview' => '#1d2327',
+                'colors' => array(
+                    'menu_color' => '#1d2327',
+                    'text_color' => '#f0f0f1',
+                    'hover_bg_color' => '#3c434a',
+                    'hover_text_color' => '#72aee6',
+                    'active_bg_color' => '#2271b1',
+                    'active_text_color' => '#ffffff',
+                    'submenu_bg_color' => '#2c3338',
+                    'submenu_text_color' => '#f0f0f1',
+                    'submenu_hover_bg_color' => '#1d2327',
+                    'submenu_hover_text_color' => '#72aee6',
+                    'submenu_active_bg_color' => '#2271b1',
+                    'submenu_active_text_color' => '#ffffff',
+                )
+            ),
+            'light' => array(
+                'name' => __('Light', 'custom-dashboard-controller'),
+                'preview' => '#f0f0f1',
+                'colors' => array(
+                    'menu_color' => '#f0f0f1',
+                    'text_color' => '#1d2327',
+                    'hover_bg_color' => '#e0e0e0',
+                    'hover_text_color' => '#0073aa',
+                    'active_bg_color' => '#0073aa',
+                    'active_text_color' => '#ffffff',
+                    'submenu_bg_color' => '#e5e5e5',
+                    'submenu_text_color' => '#1d2327',
+                    'submenu_hover_bg_color' => '#d5d5d5',
+                    'submenu_hover_text_color' => '#0073aa',
+                    'submenu_active_bg_color' => '#0073aa',
+                    'submenu_active_text_color' => '#ffffff',
+                )
+            ),
+            'blue' => array(
+                'name' => __('Blue', 'custom-dashboard-controller'),
+                'preview' => '#1e3a5f',
+                'colors' => array(
+                    'menu_color' => '#1e3a5f',
+                    'text_color' => '#ffffff',
+                    'hover_bg_color' => '#2c5282',
+                    'hover_text_color' => '#90cdf4',
+                    'active_bg_color' => '#3182ce',
+                    'active_text_color' => '#ffffff',
+                    'submenu_bg_color' => '#2a4365',
+                    'submenu_text_color' => '#e2e8f0',
+                    'submenu_hover_bg_color' => '#1e3a5f',
+                    'submenu_hover_text_color' => '#90cdf4',
+                    'submenu_active_bg_color' => '#3182ce',
+                    'submenu_active_text_color' => '#ffffff',
+                )
+            ),
+            'green' => array(
+                'name' => __('Green', 'custom-dashboard-controller'),
+                'preview' => '#1a4731',
+                'colors' => array(
+                    'menu_color' => '#1a4731',
+                    'text_color' => '#ffffff',
+                    'hover_bg_color' => '#276749',
+                    'hover_text_color' => '#9ae6b4',
+                    'active_bg_color' => '#38a169',
+                    'active_text_color' => '#ffffff',
+                    'submenu_bg_color' => '#22543d',
+                    'submenu_text_color' => '#e2e8f0',
+                    'submenu_hover_bg_color' => '#1a4731',
+                    'submenu_hover_text_color' => '#9ae6b4',
+                    'submenu_active_bg_color' => '#38a169',
+                    'submenu_active_text_color' => '#ffffff',
+                )
+            ),
+            'purple' => array(
+                'name' => __('Purple', 'custom-dashboard-controller'),
+                'preview' => '#44337a',
+                'colors' => array(
+                    'menu_color' => '#44337a',
+                    'text_color' => '#ffffff',
+                    'hover_bg_color' => '#553c9a',
+                    'hover_text_color' => '#d6bcfa',
+                    'active_bg_color' => '#805ad5',
+                    'active_text_color' => '#ffffff',
+                    'submenu_bg_color' => '#4c3d7a',
+                    'submenu_text_color' => '#e9d8fd',
+                    'submenu_hover_bg_color' => '#44337a',
+                    'submenu_hover_text_color' => '#d6bcfa',
+                    'submenu_active_bg_color' => '#805ad5',
+                    'submenu_active_text_color' => '#ffffff',
+                )
+            ),
+            'red' => array(
+                'name' => __('Red', 'custom-dashboard-controller'),
+                'preview' => '#742a2a',
+                'colors' => array(
+                    'menu_color' => '#742a2a',
+                    'text_color' => '#ffffff',
+                    'hover_bg_color' => '#9b2c2c',
+                    'hover_text_color' => '#feb2b2',
+                    'active_bg_color' => '#e53e3e',
+                    'active_text_color' => '#ffffff',
+                    'submenu_bg_color' => '#822727',
+                    'submenu_text_color' => '#fed7d7',
+                    'submenu_hover_bg_color' => '#742a2a',
+                    'submenu_hover_text_color' => '#feb2b2',
+                    'submenu_active_bg_color' => '#e53e3e',
+                    'submenu_active_text_color' => '#ffffff',
+                )
+            ),
+            'orange' => array(
+                'name' => __('Orange', 'custom-dashboard-controller'),
+                'preview' => '#7b341e',
+                'colors' => array(
+                    'menu_color' => '#7b341e',
+                    'text_color' => '#ffffff',
+                    'hover_bg_color' => '#9c4221',
+                    'hover_text_color' => '#fbd38d',
+                    'active_bg_color' => '#dd6b20',
+                    'active_text_color' => '#ffffff',
+                    'submenu_bg_color' => '#8b4513',
+                    'submenu_text_color' => '#feebc8',
+                    'submenu_hover_bg_color' => '#7b341e',
+                    'submenu_hover_text_color' => '#fbd38d',
+                    'submenu_active_bg_color' => '#dd6b20',
+                    'submenu_active_text_color' => '#ffffff',
+                )
+            ),
+            'midnight' => array(
+                'name' => __('Midnight', 'custom-dashboard-controller'),
+                'preview' => '#0d1117',
+                'colors' => array(
+                    'menu_color' => '#0d1117',
+                    'text_color' => '#c9d1d9',
+                    'hover_bg_color' => '#161b22',
+                    'hover_text_color' => '#58a6ff',
+                    'active_bg_color' => '#238636',
+                    'active_text_color' => '#ffffff',
+                    'submenu_bg_color' => '#161b22',
+                    'submenu_text_color' => '#c9d1d9',
+                    'submenu_hover_bg_color' => '#0d1117',
+                    'submenu_hover_text_color' => '#58a6ff',
+                    'submenu_active_bg_color' => '#238636',
+                    'submenu_active_text_color' => '#ffffff',
+                )
+            ),
+        );
+    }
+
+    /**
+     * Render Tools tab (NEW v1.6.0)
+     */
+    private function render_tools_tab() {
+        ?>
+        <!-- Import/Export Section -->
+        <div class="cdc-settings-section">
+            <h2><?php _e('Import / Export Settings', 'custom-dashboard-controller'); ?></h2>
+
+            <div class="cdc-info-box cdc-info-green">
+                <span class="dashicons dashicons-database"></span>
+                <div>
+                    <strong><?php _e('Backup & Restore:', 'custom-dashboard-controller'); ?></strong>
+                    <?php _e('Export your settings as a JSON file to backup or transfer to another site. Import previously exported settings.', 'custom-dashboard-controller'); ?>
+                </div>
+            </div>
+
+            <div class="cdc-import-export-grid">
+                <!-- Export -->
+                <div class="cdc-tool-card">
+                    <h3><span class="dashicons dashicons-download"></span> <?php _e('Export Settings', 'custom-dashboard-controller'); ?></h3>
+                    <p><?php _e('Download all plugin settings as a JSON file.', 'custom-dashboard-controller'); ?></p>
+                    <button type="button" id="cdc-export-btn" class="button button-primary">
+                        <span class="dashicons dashicons-download"></span>
+                        <?php _e('Export Settings', 'custom-dashboard-controller'); ?>
+                    </button>
+                </div>
+
+                <!-- Import -->
+                <div class="cdc-tool-card">
+                    <h3><span class="dashicons dashicons-upload"></span> <?php _e('Import Settings', 'custom-dashboard-controller'); ?></h3>
+                    <p><?php _e('Upload a previously exported JSON file to restore settings.', 'custom-dashboard-controller'); ?></p>
+                    <input type="file" id="cdc-import-file" accept=".json" style="display: none;">
+                    <button type="button" id="cdc-import-btn" class="button button-secondary">
+                        <span class="dashicons dashicons-upload"></span>
+                        <?php _e('Choose File & Import', 'custom-dashboard-controller'); ?>
+                    </button>
+                    <span id="cdc-import-status" class="cdc-status-message"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset to Default Section -->
+        <div class="cdc-settings-section">
+            <h2><?php _e('Reset to Default', 'custom-dashboard-controller'); ?></h2>
+
+            <div class="cdc-info-box cdc-info-orange">
+                <span class="dashicons dashicons-warning"></span>
+                <div>
+                    <strong><?php _e('Warning:', 'custom-dashboard-controller'); ?></strong>
+                    <?php _e('This will reset ALL plugin settings to their default values. This action cannot be undone. Consider exporting your settings first.', 'custom-dashboard-controller'); ?>
+                </div>
+            </div>
+
+            <div class="cdc-tool-card cdc-reset-card">
+                <h3><span class="dashicons dashicons-image-rotate"></span> <?php _e('Reset All Settings', 'custom-dashboard-controller'); ?></h3>
+                <p><?php _e('Restore all settings to their original default values.', 'custom-dashboard-controller'); ?></p>
+                <button type="button" id="cdc-reset-all-btn" class="button button-secondary cdc-danger-btn">
+                    <span class="dashicons dashicons-trash"></span>
+                    <?php _e('Reset to Defaults', 'custom-dashboard-controller'); ?>
+                </button>
+                <span id="cdc-reset-status" class="cdc-status-message"></span>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * AJAX: Apply color scheme (NEW v1.6.0)
+     */
+    public function ajax_apply_color_scheme() {
+        check_ajax_referer('cdc_ajax_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Unauthorized', 'custom-dashboard-controller')));
+        }
+
+        $scheme_id = isset($_POST['scheme']) ? sanitize_key($_POST['scheme']) : '';
+        $schemes = self::get_color_schemes();
+
+        if (!isset($schemes[$scheme_id])) {
+            wp_send_json_error(array('message' => __('Invalid color scheme', 'custom-dashboard-controller')));
+        }
+
+        $settings = get_option('cdc_settings', array());
+        $settings = array_merge($settings, $schemes[$scheme_id]['colors']);
+        update_option('cdc_settings', $settings);
+
+        wp_send_json_success(array(
+            'message' => sprintf(__('Applied "%s" color scheme! Refreshing...', 'custom-dashboard-controller'), $schemes[$scheme_id]['name']),
+            'colors' => $schemes[$scheme_id]['colors']
+        ));
+    }
+
+    /**
+     * AJAX: Export all settings (NEW v1.6.0)
+     */
+    public function ajax_export_settings() {
+        check_ajax_referer('cdc_ajax_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Unauthorized', 'custom-dashboard-controller')));
+        }
+
+        $export_data = array(
+            'plugin_version' => CDC_VERSION,
+            'export_date' => current_time('mysql'),
+            'site_url' => get_site_url(),
+            'settings' => array(
+                'cdc_settings' => get_option('cdc_settings', array()),
+                'cdc_menu_visibility' => get_option('cdc_menu_visibility', array()),
+                'cdc_submenu_visibility' => get_option('cdc_submenu_visibility', array()),
+                'cdc_menu_order' => get_option('cdc_menu_order', array()),
+                'cdc_submenu_order' => get_option('cdc_submenu_order', array()),
+                'cdc_adminbar_visibility' => get_option('cdc_adminbar_visibility', array()),
+                'cdc_adminbar_frontend' => get_option('cdc_adminbar_frontend', array()),
+                'cdc_adminbar_custom_items' => get_option('cdc_adminbar_custom_items', array()),
+                'cdc_dashboard_widgets' => get_option('cdc_dashboard_widgets', array()),
+                'cdc_login_settings' => get_option('cdc_login_settings', array()),
+            )
+        );
+
+        wp_send_json_success(array(
+            'data' => $export_data,
+            'filename' => 'cdc-settings-' . date('Y-m-d-His') . '.json'
+        ));
+    }
+
+    /**
+     * AJAX: Import settings (NEW v1.6.0)
+     */
+    public function ajax_import_settings() {
+        check_ajax_referer('cdc_ajax_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Unauthorized', 'custom-dashboard-controller')));
+        }
+
+        $json_data = isset($_POST['import_data']) ? wp_unslash($_POST['import_data']) : '';
+
+        if (empty($json_data)) {
+            wp_send_json_error(array('message' => __('No import data provided', 'custom-dashboard-controller')));
+        }
+
+        $import_data = json_decode($json_data, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            wp_send_json_error(array('message' => __('Invalid JSON format', 'custom-dashboard-controller')));
+        }
+
+        if (!isset($import_data['settings']) || !is_array($import_data['settings'])) {
+            wp_send_json_error(array('message' => __('Invalid settings format', 'custom-dashboard-controller')));
+        }
+
+        $valid_options = array(
+            'cdc_settings',
+            'cdc_menu_visibility',
+            'cdc_submenu_visibility',
+            'cdc_menu_order',
+            'cdc_submenu_order',
+            'cdc_adminbar_visibility',
+            'cdc_adminbar_frontend',
+            'cdc_adminbar_custom_items',
+            'cdc_dashboard_widgets',
+            'cdc_login_settings',
+        );
+
+        $imported = 0;
+        foreach ($import_data['settings'] as $option_name => $option_value) {
+            if (in_array($option_name, $valid_options)) {
+                update_option($option_name, $option_value);
+                $imported++;
+            }
+        }
+
+        wp_send_json_success(array(
+            'message' => sprintf(__('Successfully imported %d settings! Refreshing...', 'custom-dashboard-controller'), $imported)
+        ));
+    }
+
+    /**
+     * AJAX: Reset all settings to default (NEW v1.6.0)
+     */
+    public function ajax_reset_all_settings() {
+        check_ajax_referer('cdc_ajax_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Unauthorized', 'custom-dashboard-controller')));
+        }
+
+        $defaults = array(
+            'cdc_settings' => array(
+                'menu_color' => '#1d2327',
+                'text_color' => '#f0f0f1',
+                'custom_logo' => '',
+                'logo_text' => '',
+                'hover_bg_color' => '#3c434a',
+                'hover_text_color' => '#72aee6',
+                'active_bg_color' => '#2271b1',
+                'active_text_color' => '#ffffff',
+                'submenu_bg_color' => '#2c3338',
+                'submenu_text_color' => '#f0f0f1',
+                'submenu_hover_bg_color' => '#1d2327',
+                'submenu_hover_text_color' => '#72aee6',
+                'submenu_active_bg_color' => '#2271b1',
+                'submenu_active_text_color' => '#ffffff',
+            ),
+            'cdc_menu_visibility' => array(),
+            'cdc_submenu_visibility' => array(),
+            'cdc_menu_order' => array(),
+            'cdc_submenu_order' => array(),
+            'cdc_adminbar_visibility' => array(),
+            'cdc_adminbar_frontend' => array(),
+            'cdc_adminbar_custom_items' => array(),
+            'cdc_dashboard_widgets' => array(),
+            'cdc_login_settings' => array(),
+        );
+
+        foreach ($defaults as $option_name => $default_value) {
+            update_option($option_name, $default_value);
+        }
+
+        wp_send_json_success(array(
+            'message' => __('All settings have been reset to defaults! Refreshing...', 'custom-dashboard-controller')
+        ));
     }
 }

@@ -300,6 +300,22 @@
     border-color: #ff9800;
 }
 
+.cdc-menu-item.cdc-protected {
+    background: #f0f6fc;
+    border-color: #0073aa;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.cdc-menu-item.cdc-protected:hover {
+    background: #f0f6fc;
+    border-color: #0073aa;
+}
+
+.cdc-menu-item.cdc-protected input[type="checkbox"] {
+    cursor: not-allowed;
+}
+
 .cdc-menu-item input[type="checkbox"] {
     margin-right: 10px;
     flex-shrink: 0;
@@ -999,28 +1015,416 @@
     .cdc-roles-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .cdc-submenu-selector {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .cdc-select {
         width: 100%;
         min-width: auto;
     }
-    
+
     .cdc-nav-tabs .nav-tab {
         display: block;
         margin-right: 0;
         margin-bottom: 5px;
     }
-    
+
     .cdc-role-checkboxes {
         flex-direction: column;
     }
-    
+
     .cdc-frontend-table {
         font-size: 13px;
+    }
+}
+
+/* ===========================================
+   15. Login Page Branding Tab Styles (NEW v1.5.2)
+   =========================================== */
+
+/* Layout Selector */
+.cdc-layout-selector {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.cdc-layout-option {
+    flex: 1;
+    min-width: 200px;
+    max-width: 250px;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    background: #fff;
+}
+
+.cdc-layout-option:hover {
+    border-color: #0073aa;
+    background: #f0f6fc;
+}
+
+.cdc-layout-option.active {
+    border-color: #0073aa;
+    background: #e8f4fc;
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.2);
+}
+
+.cdc-layout-option input[type="radio"] {
+    display: none;
+}
+
+.cdc-layout-preview {
+    height: 100px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.cdc-layout-center-preview .cdc-layout-form-box {
+    width: 50px;
+    height: 60px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.cdc-layout-two-col-preview {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.cdc-layout-col {
+    flex: 1;
+    height: 100%;
+}
+
+.cdc-layout-form-col {
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cdc-layout-form-col::after {
+    content: '';
+    width: 30px;
+    height: 40px;
+    background: #f0f0f1;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.cdc-layout-image-col {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.cdc-layout-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1d2327;
+}
+
+/* Background Type Selector */
+.cdc-bg-type-selector {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.cdc-radio-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 25px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+    min-width: 120px;
+}
+
+.cdc-radio-card:hover {
+    border-color: #0073aa;
+    background: #f0f6fc;
+}
+
+.cdc-radio-card.active {
+    border-color: #0073aa;
+    background: #e8f4fc;
+}
+
+.cdc-radio-card input[type="radio"] {
+    display: none;
+}
+
+.cdc-radio-card .dashicons {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 8px;
+    color: #50575e;
+}
+
+.cdc-radio-card.active .dashicons {
+    color: #0073aa;
+}
+
+.cdc-radio-card span:last-child {
+    font-size: 12px;
+    font-weight: 500;
+    color: #1d2327;
+}
+
+/* Background Options */
+.cdc-bg-options {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Image Upload for Login */
+.cdc-image-upload {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.cdc-image-preview {
+    width: 200px;
+    height: 120px;
+    border: 2px dashed #c3c4c7;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f6f7f7;
+    overflow: hidden;
+}
+
+.cdc-image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.cdc-no-image {
+    color: #787c82;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Gradient Preview */
+.cdc-gradient-preview {
+    height: 60px;
+    border-radius: 6px;
+    margin-top: 15px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+/* Two Column Settings Section */
+.cdc-two-column-settings {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px dashed #c3c4c7;
+}
+
+/* Preview Button */
+.button-hero {
+    padding: 12px 24px !important;
+    height: auto !important;
+    font-size: 15px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.button-hero .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+/* Login Tab Responsive */
+@media (max-width: 782px) {
+    .cdc-layout-selector {
+        flex-direction: column;
+    }
+
+    .cdc-layout-option {
+        max-width: 100%;
+    }
+
+    .cdc-bg-type-selector {
+        flex-direction: column;
+    }
+
+    .cdc-radio-card {
+        flex-direction: row;
+        min-width: auto;
+        gap: 10px;
+    }
+
+    .cdc-radio-card .dashicons {
+        margin-bottom: 0;
+    }
+
+    .cdc-image-preview {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
+/* ===========================================
+   16. Tools Tab Styles (NEW v1.6.0)
+   =========================================== */
+
+/* Color Schemes Grid */
+.cdc-color-schemes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.cdc-scheme-card {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.cdc-scheme-card:hover {
+    border-color: #0073aa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.cdc-scheme-preview {
+    height: 60px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 8px;
+    gap: 4px;
+}
+
+.cdc-scheme-preview-item {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+}
+
+.cdc-scheme-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1d2327;
+    margin-bottom: 8px;
+}
+
+.cdc-scheme-card .button {
+    width: 100%;
+}
+
+/* Import/Export Grid */
+.cdc-import-export-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.cdc-tool-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.cdc-tool-card h3 {
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+}
+
+.cdc-tool-card h3 .dashicons {
+    color: #0073aa;
+}
+
+.cdc-tool-card p {
+    color: #646970;
+    margin: 0 0 15px 0;
+    font-size: 13px;
+}
+
+.cdc-tool-card .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cdc-tool-card .button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Reset Card - Danger styling */
+.cdc-reset-card {
+    border-color: #f0b849;
+    background: #fffbf0;
+}
+
+.cdc-danger-btn {
+    background: #d63638 !important;
+    border-color: #d63638 !important;
+    color: #fff !important;
+}
+
+.cdc-danger-btn:hover {
+    background: #b32d2e !important;
+    border-color: #b32d2e !important;
+    color: #fff !important;
+}
+
+.cdc-danger-btn:focus {
+    box-shadow: 0 0 0 1px #fff, 0 0 0 3px #d63638 !important;
+}
+
+/* Tools Tab Responsive */
+@media (max-width: 782px) {
+    .cdc-color-schemes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cdc-import-export-grid {
+        grid-template-columns: 1fr;
     }
 }

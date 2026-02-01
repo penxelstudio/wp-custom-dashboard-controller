@@ -1,8 +1,8 @@
 /**
  * Custom Dashboard Controller - Admin JavaScript
- * 
+ *
  * @package CustomDashboardController
- * @version 1.4.0
+ * @version 1.5.2
  */
 
 (function($) {
@@ -61,16 +61,16 @@
             updateHiddenCount($(this).closest('.cdc-role-card'));
         });
         
-        // Check All button
+        // Check All button (respects disabled/protected items)
         $(document).on('click', '.cdc-check-all', function() {
             var target = $(this).data('target');
-            $('[data-group="' + target + '"] input[type="checkbox"]').prop('checked', true).trigger('change');
+            $('[data-group="' + target + '"] input[type="checkbox"]:not(:disabled)').prop('checked', true).trigger('change');
         });
-        
-        // Uncheck All button
+
+        // Uncheck All button (respects disabled/protected items)
         $(document).on('click', '.cdc-uncheck-all', function() {
             var target = $(this).data('target');
-            $('[data-group="' + target + '"] input[type="checkbox"]').prop('checked', false).trigger('change');
+            $('[data-group="' + target + '"] input[type="checkbox"]:not(:disabled)').prop('checked', false).trigger('change');
         });
         
         // Update hidden count for a role card
@@ -601,9 +601,299 @@
         });
         
         // =============================================
+        // Login Page Branding (NEW v1.5.2)
+        // =============================================
+
+        // Login Logo Upload
+        $('#cdc_upload_login_logo').on('click', function(e) {
+            e.preventDefault();
+
+            var mediaUploader = wp.media({
+                title: 'Select Login Logo',
+                button: { text: 'Use as Logo' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                $('#cdc_login_logo').val(attachment.url);
+                $('#cdc_login_logo_preview').html('<img src="' + attachment.url + '" alt="Logo">');
+                $('#cdc_remove_login_logo').show();
+            });
+
+            mediaUploader.open();
+        });
+
+        $('#cdc_remove_login_logo').on('click', function(e) {
+            e.preventDefault();
+            $('#cdc_login_logo').val('');
+            $('#cdc_login_logo_preview').html('<span class="cdc-no-logo">No logo selected</span>');
+            $(this).hide();
+        });
+
+        // Background Image Upload
+        $('#cdc_upload_login_bg').on('click', function(e) {
+            e.preventDefault();
+
+            var mediaUploader = wp.media({
+                title: 'Select Background Image',
+                button: { text: 'Use as Background' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                $('#cdc_login_bg_image').val(attachment.url);
+                $('#cdc_login_bg_preview').html('<img src="' + attachment.url + '" alt="Background">');
+                $('#cdc_remove_login_bg').show();
+            });
+
+            mediaUploader.open();
+        });
+
+        $('#cdc_remove_login_bg').on('click', function(e) {
+            e.preventDefault();
+            $('#cdc_login_bg_image').val('');
+            $('#cdc_login_bg_preview').html('<span class="cdc-no-image">No image selected</span>');
+            $(this).hide();
+        });
+
+        // Column Image Upload (Two-column layout)
+        $('#cdc_upload_column_image').on('click', function(e) {
+            e.preventDefault();
+
+            var mediaUploader = wp.media({
+                title: 'Select Column Background Image',
+                button: { text: 'Use as Background' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                $('#cdc_login_column_image').val(attachment.url);
+                $('#cdc_login_column_preview').html('<img src="' + attachment.url + '" alt="Column Background">');
+                $('#cdc_remove_column_image').show();
+            });
+
+            mediaUploader.open();
+        });
+
+        $('#cdc_remove_column_image').on('click', function(e) {
+            e.preventDefault();
+            $('#cdc_login_column_image').val('');
+            $('#cdc_login_column_preview').html('<span class="cdc-no-image">No image selected</span>');
+            $(this).hide();
+        });
+
+        // Layout Style Selection
+        $('.cdc-layout-option input[type="radio"]').on('change', function() {
+            var $option = $(this).closest('.cdc-layout-option');
+            var layout = $(this).val();
+
+            // Update active class
+            $('.cdc-layout-option').removeClass('active');
+            $option.addClass('active');
+
+            // Show/hide two-column settings
+            if (layout === 'center') {
+                $('.cdc-two-column-settings').slideUp(200);
+            } else {
+                $('.cdc-two-column-settings').slideDown(200);
+            }
+        });
+
+        // Background Type Selection
+        $('.cdc-bg-type-selector input[type="radio"]').on('change', function() {
+            var $card = $(this).closest('.cdc-radio-card');
+            var bgType = $(this).val();
+
+            // Update active class
+            $('.cdc-radio-card').removeClass('active');
+            $card.addClass('active');
+
+            // Show/hide relevant options
+            $('.cdc-bg-options').hide();
+            $('.cdc-bg-' + bgType + '-options').slideDown(200);
+        });
+
+        // Gradient Preview Update
+        function updateGradientPreview() {
+            var start = $('#login_gradient_start').val();
+            var end = $('#login_gradient_end').val();
+            var direction = $('#login_gradient_direction').val();
+
+            $('#cdc-gradient-preview').css('background', 'linear-gradient(' + direction + ', ' + start + ', ' + end + ')');
+        }
+
+        $('#login_gradient_start, #login_gradient_end').on('input change', updateGradientPreview);
+        $('#login_gradient_direction').on('change', updateGradientPreview);
+
+        // =============================================
+        // Tools Tab - v1.6.0 Features
+        // =============================================
+
+        // Apply Color Scheme
+        $(document).on('click', '.cdc-apply-scheme', function() {
+            var $btn = $(this);
+            var $status = $('#cdc-scheme-status');
+            var scheme = $btn.data('scheme');
+
+            $btn.prop('disabled', true);
+            showStatus($status, cdcAdmin.strings.saving, 'loading');
+
+            $.ajax({
+                url: cdcAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'cdc_apply_color_scheme',
+                    nonce: cdcAdmin.nonce,
+                    scheme: scheme
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showStatus($status, response.data.message, 'success');
+                        setTimeout(function() { location.reload(); }, 1500);
+                    } else {
+                        showStatus($status, response.data.message || cdcAdmin.strings.error, 'error');
+                        $btn.prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    showStatus($status, cdcAdmin.strings.error, 'error');
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+
+        // Export Settings
+        $('#cdc-export-btn').on('click', function() {
+            var $btn = $(this);
+            $btn.prop('disabled', true);
+
+            $.ajax({
+                url: cdcAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'cdc_export_settings',
+                    nonce: cdcAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Create and download the file
+                        var dataStr = JSON.stringify(response.data.data, null, 2);
+                        var blob = new Blob([dataStr], { type: 'application/json' });
+                        var url = URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = response.data.filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    } else {
+                        alert(response.data.message || cdcAdmin.strings.error);
+                    }
+                    $btn.prop('disabled', false);
+                },
+                error: function() {
+                    alert(cdcAdmin.strings.error);
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+
+        // Import Settings - trigger file input
+        $('#cdc-import-btn').on('click', function() {
+            $('#cdc-import-file').click();
+        });
+
+        // Import Settings - handle file selection
+        $('#cdc-import-file').on('change', function(e) {
+            var file = e.target.files[0];
+            var $status = $('#cdc-import-status');
+
+            if (!file) return;
+
+            if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+                showStatus($status, 'Please select a valid JSON file', 'error');
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var content = e.target.result;
+
+                showStatus($status, cdcAdmin.strings.saving, 'loading');
+
+                $.ajax({
+                    url: cdcAdmin.ajaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: 'cdc_import_settings',
+                        nonce: cdcAdmin.nonce,
+                        import_data: content
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            showStatus($status, response.data.message, 'success');
+                            setTimeout(function() { location.reload(); }, 1500);
+                        } else {
+                            showStatus($status, response.data.message || cdcAdmin.strings.error, 'error');
+                        }
+                    },
+                    error: function() {
+                        showStatus($status, cdcAdmin.strings.error, 'error');
+                    }
+                });
+            };
+            reader.readAsText(file);
+
+            // Reset file input
+            $(this).val('');
+        });
+
+        // Reset All Settings
+        $('#cdc-reset-all-btn').on('click', function() {
+            if (!confirm('Are you sure you want to reset ALL settings to defaults? This cannot be undone!')) {
+                return;
+            }
+
+            var $btn = $(this);
+            var $status = $('#cdc-reset-status');
+
+            $btn.prop('disabled', true);
+            showStatus($status, cdcAdmin.strings.saving, 'loading');
+
+            $.ajax({
+                url: cdcAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'cdc_reset_all_settings',
+                    nonce: cdcAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showStatus($status, response.data.message, 'success');
+                        setTimeout(function() { location.reload(); }, 1500);
+                    } else {
+                        showStatus($status, response.data.message || cdcAdmin.strings.error, 'error');
+                        $btn.prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    showStatus($status, cdcAdmin.strings.error, 'error');
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+
+        // =============================================
         // Utility Functions
         // =============================================
-        
+
         /**
          * Show status message
          * @param {jQuery} $element Status element
@@ -616,14 +906,14 @@
                 .addClass(type)
                 .text(message)
                 .fadeIn();
-            
+
             if (type !== 'loading') {
                 setTimeout(function() {
                     $element.fadeOut();
                 }, 5000);
             }
         }
-        
+
     });
-    
+
 })(jQuery);
