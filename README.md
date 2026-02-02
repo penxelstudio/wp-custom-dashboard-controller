@@ -2,7 +2,7 @@
 
 A comprehensive WordPress plugin for customizing the admin dashboard appearance and functionality with role-based access control.
 
-**Version:** 1.5.1
+**Version:** 1.6.0
 **Author:** Penxel Studio
 **Requires WordPress:** 6.0+
 **Requires PHP:** 7.4+
@@ -15,7 +15,8 @@ A comprehensive WordPress plugin for customizing the admin dashboard appearance 
 - **Menu Text Color** - Change the color of menu item text
 - **Hover States** - Separate background and text colors for hover effects
 - **Active Menu States** - Custom colors for currently active menu items
-- **Submenu Colors** - Full control over submenu dropdown appearance including background, text, hover, and active states
+- **Submenu Colors** - Full control over submenu dropdown appearance
+- **Preset Color Schemes** - Quick-apply pre-built color themes
 
 ### Logo & Branding
 - **Custom Logo** - Add your brand logo at the top of the admin sidebar
@@ -26,6 +27,7 @@ A comprehensive WordPress plugin for customizing the admin dashboard appearance 
 - **Parent Menu Visibility** - Hide specific admin menu items per user role
 - **Submenu Visibility** - Granular control over individual submenu items per role
 - **Role-Based Access** - Different menu configurations for different user roles
+- **Lockout Protection** - Dashboard Controller menu protected for administrators
 
 ### Menu Ordering
 - **Drag & Drop Reordering** - Easily reorder parent menu items
@@ -41,6 +43,17 @@ A comprehensive WordPress plugin for customizing the admin dashboard appearance 
 - **Shortcode Widgets** - Create custom dashboard widgets using any shortcode
 - **Auto-Refresh** - Widgets automatically refresh content (1-hour interval)
 - **Role-Based Display** - Show widgets only to specific user roles
+
+### Login Page Branding
+- **Custom Login Logo** - Replace WordPress logo on login page
+- **Background Options** - Solid color, image, or gradient backgrounds
+- **Two-Column Layout** - Modern split-screen login design
+- **Form Styling** - Customize login form appearance
+
+### Tools
+- **Preset Color Schemes** - One-click color theme application
+- **Import/Export Settings** - Transfer settings between sites
+- **Reset to Defaults** - Restore all settings to original state
 
 ## Installation
 
@@ -60,6 +73,7 @@ After activation, navigate to **Dashboard Controller** in the WordPress admin me
 
 ### Basic Settings Tab
 Configure colors and logo:
+- Choose a preset color scheme for quick styling
 - Set menu background and text colors
 - Configure hover and active state colors
 - Set submenu colors
@@ -70,6 +84,7 @@ Control which menus are visible:
 - Select checkboxes to hide menu items
 - Configure separately for each user role
 - Manage both parent menus and submenus
+- Dashboard Controller is protected for administrators
 
 ### Menu Order Tab
 Reorder admin menus:
@@ -89,7 +104,34 @@ Create custom dashboard widgets:
 - Configure role visibility
 - Widgets appear on the main dashboard
 
+### Login Page Tab
+Brand the WordPress login page:
+- Upload custom login logo
+- Choose background type (color, image, gradient)
+- Select centered or two-column layout
+- Preview changes before saving
+
+### Tools Tab
+Manage plugin settings:
+- Export all settings to JSON file
+- Import settings from another site
+- Reset all settings to defaults
+
 ## Changelog
+
+### 1.6.0
+- Added preset color schemes for quick styling
+- Added import/export settings functionality
+- Added reset all settings option
+- Added Settings link on Plugins page
+- Added protection to prevent hiding Dashboard Controller for administrators
+- Moved preset schemes to Basic Settings tab for better UX
+
+### 1.5.2
+- Added login page branding feature
+- Custom login logo support
+- Background color, image, and gradient options
+- Two-column login layout option
 
 ### 1.5.1
 - Added submenu color controls (background, text, hover, active states)
