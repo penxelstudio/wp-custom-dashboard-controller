@@ -3,13 +3,14 @@
  * Plugin Name: Custom Dashboard Controller
  * Plugin URI: https://penxelstudio.com
  * Description: Customize WordPress dashboard colors, logo, menu visibility, submenu control, admin bar, custom dashboard widgets, login page branding, preset color schemes, and import/export settings
- * Version: 1.6.0
+ * Version: 1.6.1
  * Author: Penxel Studio
  * Author URI: https://penxelstudio.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: custom-dashboard-controller
  * Requires at least: 6.0
+ * Tested up to: 7.0
  * Requires PHP: 7.4
  *
  * @package CustomDashboardController
@@ -25,7 +26,7 @@ if (!defined('ABSPATH')) {
  * Define plugin constants
  * These constants are used throughout the plugin for paths and version
  */
-define('CDC_VERSION', '1.6.0');
+define('CDC_VERSION', '1.6.1');
 define('CDC_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('CDC_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('CDC_PLUGIN_BASENAME', plugin_basename(__FILE__));

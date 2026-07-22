@@ -77,8 +77,6 @@ class CDC_Customizer {
 
         ?>
         <style type="text/css">
-            /* Import Poppins Font from Google Fonts */
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
             /* ===========================================
                Admin Menu Background Colors
                =========================================== */
@@ -194,7 +192,7 @@ class CDC_Customizer {
             }
 
             #cdc-sidebar-logo .cdc-logo-text {
-                font-family: 'Poppins', sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
                 font-weight: 700;
                 font-size: 16px;
                 color: <?php echo esc_attr($text_color); ?>;

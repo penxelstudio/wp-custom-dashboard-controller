@@ -406,6 +406,92 @@ class CDC_Settings {
     }
     
     /**
+     * Sanitize a single imported option by name (NEW v1.6.1)
+     *
+     * Reuses the registered sanitize callbacks where available and applies
+     * dedicated sanitizers for options that are managed via AJAX (and therefore
+     * have no register_setting callback).
+     *
+     * @param string $option_name
+     * @param mixed  $value
+     * @return mixed Sanitized value
+     */
+    private function sanitize_imported_option($option_name, $value) {
+        switch ($option_name) {
+            case 'cdc_settings':
+                return $this->sanitize_basic_settings((array) $value);
+            case 'cdc_menu_visibility':
+                return $this->sanitize_menu_visibility((array) $value);
+            case 'cdc_submenu_visibility':
+                return $this->sanitize_submenu_visibility((array) $value);
+            case 'cdc_adminbar_visibility':
+                return $this->sanitize_adminbar_visibility((array) $value);
+            case 'cdc_adminbar_frontend':
+                return $this->sanitize_adminbar_frontend((array) $value);
+            case 'cdc_login_settings':
+                return $this->sanitize_login_settings((array) $value);
+
+            case 'cdc_menu_order':
+                return is_array($value)
+                    ? array_values(array_filter(array_map('sanitize_text_field', $value)))
+                    : array();
+
+            case 'cdc_submenu_order':
+                $clean = array();
+                if (is_array($value)) {
+                    foreach ($value as $parent => $slugs) {
+                        if (is_array($slugs)) {
+                            $clean[sanitize_text_field($parent)] = array_values(
+                                array_filter(array_map('sanitize_text_field', $slugs))
+                            );
+                        }
+                    }
+                }
+                return $clean;
+
+            case 'cdc_adminbar_custom_items':
+                $clean = array();
+                if (is_array($value)) {
+                    foreach ($value as $item) {
+                        if (!is_array($item)) {
+                            continue;
+                        }
+                        $clean[] = array(
+                            'id'      => isset($item['id']) ? sanitize_key($item['id']) : 'item-' . time() . '-' . wp_rand(100, 999),
+                            'title'   => isset($item['title']) ? sanitize_text_field($item['title']) : '',
+                            'url'     => isset($item['url']) ? esc_url_raw($item['url']) : '',
+                            'roles'   => isset($item['roles']) && is_array($item['roles']) ? array_map('sanitize_key', $item['roles']) : array(),
+                            'new_tab' => !empty($item['new_tab']),
+                        );
+                    }
+                }
+                return $clean;
+
+            case 'cdc_dashboard_widgets':
+                $clean = array();
+                if (is_array($value)) {
+                    foreach ($value as $widget) {
+                        if (!is_array($widget)) {
+                            continue;
+                        }
+                        $clean[] = array(
+                            'id'        => isset($widget['id']) ? sanitize_key($widget['id']) : 'widget-' . time() . '-' . wp_rand(100, 999),
+                            'title'     => isset($widget['title']) ? sanitize_text_field($widget['title']) : '',
+                            'type'      => isset($widget['type']) ? sanitize_key($widget['type']) : 'shortcode',
+                            'shortcode' => isset($widget['shortcode']) ? sanitize_textarea_field($widget['shortcode']) : '',
+                            'roles'     => isset($widget['roles']) && is_array($widget['roles']) ? array_map('sanitize_key', $widget['roles']) : array(),
+                            'created'   => isset($widget['created']) ? absint($widget['created']) : time(),
+                        );
+                    }
+                }
+                return $clean;
+
+            default:
+                return $value;
+        }
+    }
+
+    /**
      * Get current active tab
      */
     private function get_current_tab() {
@@ -2323,7 +2409,7 @@ class CDC_Settings {
 
         wp_send_json_success(array(
             'data' => $export_data,
-            'filename' => 'cdc-settings-' . date('Y-m-d-His') . '.json'
+            'filename' => 'cdc-settings-' . gmdate('Y-m-d-His') . '.json'
         ));
     }
 
@@ -2368,8 +2454,12 @@ class CDC_Settings {
 
         $imported = 0;
         foreach ($import_data['settings'] as $option_name => $option_value) {
-            if (in_array($option_name, $valid_options)) {
-                update_option($option_name, $option_value);
+            if (in_array($option_name, $valid_options, true)) {
+                // Re-sanitize imported values before persisting. Import data comes
+                // from an uploaded file, so it must not be trusted even though only
+                // administrators can reach this handler (prevents stored XSS via
+                // fields such as login custom_css or custom item titles/URLs).
+                update_option($option_name, $this->sanitize_imported_option($option_name, $option_value));
                 $imported++;
             }
         }

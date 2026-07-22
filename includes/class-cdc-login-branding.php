@@ -28,7 +28,6 @@ class CDC_Login_Branding {
         $this->settings = get_option('cdc_login_settings', $this->get_defaults());
 
         // Login page hooks
-        add_action('login_enqueue_scripts', array($this, 'enqueue_login_styles'));
         add_action('login_head', array($this, 'output_custom_styles'));
         add_filter('login_headerurl', array($this, 'custom_logo_url'));
         add_filter('login_headertext', array($this, 'custom_logo_title'));
@@ -95,18 +94,6 @@ class CDC_Login_Branding {
     }
 
     /**
-     * Enqueue Google Fonts for login page
-     */
-    public function enqueue_login_styles() {
-        wp_enqueue_style(
-            'cdc-login-fonts',
-            'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap',
-            array(),
-            CDC_VERSION
-        );
-    }
-
-    /**
      * Output custom CSS styles on login page
      */
     public function output_custom_styles() {
@@ -118,7 +105,7 @@ class CDC_Login_Branding {
         // Base styles
         $css .= '
         body.login {
-            font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
         }';
 
         // Background styles

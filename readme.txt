@@ -3,8 +3,8 @@ Contributors: penxelstudio
 Donate link: https://penxelstudio.com/donate
 Tags: admin dashboard, custom login, menu visibility, admin customization, white label
 Requires at least: 6.0
-Tested up to: 6.7
-Stable tag: 1.6.0
+Tested up to: 7.0
+Stable tag: 1.6.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -129,6 +129,13 @@ Yes, the plugin is fully translation-ready with the text domain 'custom-dashboar
 
 == Changelog ==
 
+= 1.6.1 =
+* Compatibility: Tested up to WordPress 7.0
+* Fixed: Replaced deprecated current_time('timestamp') calls with time()
+* Security: Added capability and role-visibility checks to the widget refresh AJAX handler
+* Security: Imported settings are now re-sanitized before being saved
+* Privacy: Removed external Google Fonts requests (login page and admin sidebar now use the native system font stack), matching the plugin's no-external-data policy
+
 = 1.6.0 =
 * Added preset color schemes for quick styling
 * Added import/export settings functionality
@@ -174,6 +181,9 @@ Yes, the plugin is fully translation-ready with the text domain 'custom-dashboar
 * Menu reordering
 
 == Upgrade Notice ==
+
+= 1.6.1 =
+Compatibility and security update: tested with WordPress 7.0, removed deprecated calls, hardened AJAX/import handlers, and removed external font requests. Recommended for all users.
 
 = 1.6.0 =
 New features: preset color schemes, import/export settings, and protection against accidental lockout. Update recommended for all users.

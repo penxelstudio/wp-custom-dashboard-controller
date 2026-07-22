@@ -108,7 +108,7 @@ class CDC_Dashboard_Widgets {
         if ($last_refresh) {
             echo '<p class="cdc-widget-refresh-time">';
             echo '<small>' . sprintf(__('Last updated: %s', 'custom-dashboard-controller'), 
-                human_time_diff($last_refresh, current_time('timestamp')) . ' ' . __('ago', 'custom-dashboard-controller')) . '</small>';
+                human_time_diff($last_refresh, time()) . ' ' . __('ago', 'custom-dashboard-controller')) . '</small>';
             echo '</p>';
         }
     }
@@ -143,7 +143,7 @@ class CDC_Dashboard_Widgets {
         }
         
         // Update refresh transient
-        set_transient('cdc_widget_refresh_' . $widget['id'], current_time('timestamp'), self::REFRESH_INTERVAL);
+        set_transient('cdc_widget_refresh_' . $widget['id'], time(), self::REFRESH_INTERVAL);
     }
     
     /**
@@ -251,7 +251,7 @@ class CDC_Dashboard_Widgets {
             'type'      => $type,
             'shortcode' => $shortcode,
             'roles'     => $roles,
-            'created'   => current_time('timestamp')
+            'created'   => time()
         );
         
         // Check if updating existing widget
@@ -371,7 +371,13 @@ class CDC_Dashboard_Widgets {
         if (!check_ajax_referer('cdc_ajax_nonce', 'nonce', false)) {
             wp_send_json_error(array('message' => __('Security check failed', 'custom-dashboard-controller')));
         }
-        
+
+        // Only users who can access the dashboard may refresh widget content.
+        // Prevents lower-privilege users from rendering another role's widget output.
+        if (!current_user_can('read')) {
+            wp_send_json_error(array('message' => __('Unauthorized', 'custom-dashboard-controller')));
+        }
+
         $widget_id = isset($_POST['widget_id']) ? sanitize_key($_POST['widget_id']) : '';
         
         if (empty($widget_id)) {
@@ -392,7 +398,17 @@ class CDC_Dashboard_Widgets {
         if (!$target_widget) {
             wp_send_json_error(array('message' => __('Widget not found', 'custom-dashboard-controller')));
         }
-        
+
+        // Enforce the widget's own role visibility so a user cannot fetch the
+        // rendered output of a widget that is not shown to their role.
+        $widget_roles = isset($target_widget['roles']) ? $target_widget['roles'] : array();
+        if (!empty($widget_roles)) {
+            $user_roles = wp_get_current_user()->roles;
+            if (!array_intersect($user_roles, $widget_roles)) {
+                wp_send_json_error(array('message' => __('Unauthorized', 'custom-dashboard-controller')));
+            }
+        }
+
         // Generate content
         ob_start();
         
