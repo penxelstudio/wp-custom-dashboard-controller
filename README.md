@@ -2,9 +2,10 @@
 
 A comprehensive WordPress plugin for customizing the admin dashboard appearance and functionality with role-based access control.
 
-**Version:** 1.6.0
+**Version:** 1.6.1
 **Author:** Penxel Studio
 **Requires WordPress:** 6.0+
+**Tested up to:** WordPress 7.0
 **Requires PHP:** 7.4+
 **License:** GPL v2 or later
 
@@ -20,7 +21,7 @@ A comprehensive WordPress plugin for customizing the admin dashboard appearance 
 
 ### Logo & Branding
 - **Custom Logo** - Add your brand logo at the top of the admin sidebar
-- **Logo Text** - Display text as logo with bold Poppins font styling
+- **Logo Text** - Display text as logo with bold system font styling
 - **Responsive Design** - Logo adapts when sidebar is collapsed
 
 ### Menu Visibility Control
@@ -118,6 +119,13 @@ Manage plugin settings:
 - Reset all settings to defaults
 
 ## Changelog
+
+### 1.6.1
+- **Compatibility** - Tested up to WordPress 7.0
+- **Fixed** - Replaced deprecated `current_time('timestamp')` calls with `time()`
+- **Security** - Added capability and role-visibility checks to the widget refresh AJAX handler
+- **Security** - Imported settings are now re-sanitized before being saved
+- **Privacy** - Removed external Google Fonts requests; the admin sidebar and login page now use the native system font stack
 
 ### 1.6.0
 - Added preset color schemes for quick styling
