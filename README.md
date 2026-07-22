@@ -9,6 +9,8 @@ A comprehensive WordPress plugin for customizing the admin dashboard appearance 
 **Requires PHP:** 7.4+
 **License:** GPL v2 or later
 
+Support the continued development and maintenance of our plugins. Every donation helps us build new features, fix bugs, and provide better support for the community. You can donate by using this link https://pay.chip-in.asia/penxelplugindev
+
 ## Features
 
 ### Color Customization
