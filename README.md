@@ -2,7 +2,7 @@
 
 A comprehensive WordPress plugin for customizing the admin dashboard appearance and functionality with role-based access control.
 
-**Version:** 1.6.1
+**Version:** 1.6.2
 **Author:** Penxel Studio
 **Requires WordPress:** 6.0+
 **Tested up to:** WordPress 7.0
@@ -121,6 +121,10 @@ Manage plugin settings:
 - Reset all settings to defaults
 
 ## Changelog
+
+### 1.6.2
+- **Fixed** - Login page emitted 16 `Undefined array key` warnings on a fresh install. `cdc_login_settings` is created as an empty array on activation, and `get_option()` only returns its default when the option does not exist at all, so the defaults were never applied. The stored value is now merged over them with `wp_parse_args()`.
+- **Fixed** - Settings tab labels were translated in `CDC_Settings::__construct()`, which runs on `plugins_loaded` — before `init`. That triggered the `_load_textdomain_just_in_time` notice on WordPress 6.7+. Labels are now built on first use, inside the admin callbacks.
 
 ### 1.6.1
 - **Compatibility** - Tested up to WordPress 7.0

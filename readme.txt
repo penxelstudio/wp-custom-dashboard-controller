@@ -4,7 +4,7 @@ Donate link: https://penxelstudio.com/donate
 Tags: admin dashboard, custom login, menu visibility, admin customization, white label
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -129,6 +129,10 @@ Yes, the plugin is fully translation-ready with the text domain 'custom-dashboar
 
 == Changelog ==
 
+= 1.6.2 =
+* Fixed: Login page no longer emits "Undefined array key" warnings on a fresh install. The settings row is created empty on activation, and get_option() only falls back to its default when the option is absent entirely, so the stored value is now merged over the defaults.
+* Fixed: Settings tab labels are built on first use instead of in the constructor, which removes the _load_textdomain_just_in_time notice on WordPress 6.7 and newer.
+
 = 1.6.1 =
 * Compatibility: Tested up to WordPress 7.0
 * Fixed: Replaced deprecated current_time('timestamp') calls with time()
@@ -181,6 +185,9 @@ Yes, the plugin is fully translation-ready with the text domain 'custom-dashboar
 * Menu reordering
 
 == Upgrade Notice ==
+
+= 1.6.2 =
+Bug fix release: removes PHP warnings on the login page and the translation-loading notice on WordPress 6.7+. No settings or behaviour change. Recommended for all users.
 
 = 1.6.1 =
 Compatibility and security update: tested with WordPress 7.0, removed deprecated calls, hardened AJAX/import handlers, and removed external font requests. Recommended for all users.

@@ -33,22 +33,38 @@ class CDC_Settings {
      * @var array
      */
     private $tabs = array();
+
+    /**
+     * Get the tab labels, building them on first use.
+     *
+     * Built lazily rather than in the constructor: this class is instantiated on
+     * plugins_loaded, and calling __() that early triggers WordPress's
+     * _load_textdomain_just_in_time notice (WP 6.7+). Every caller runs inside an
+     * admin callback, which is well after init.
+     *
+     * @since 1.6.2
+     * @return array Tab key => translated label.
+     */
+    private function get_tabs() {
+        if (empty($this->tabs)) {
+            $this->tabs = array(
+                'basic'      => __('Basic Settings', 'custom-dashboard-controller'),
+                'visibility' => __('Menu Visibility', 'custom-dashboard-controller'),
+                'order'      => __('Menu Order', 'custom-dashboard-controller'),
+                'adminbar'   => __('Admin Bar', 'custom-dashboard-controller'),
+                'widgets'    => __('Dashboard Widgets', 'custom-dashboard-controller'),
+                'login'      => __('Login Page', 'custom-dashboard-controller'),
+                'tools'      => __('Tools', 'custom-dashboard-controller')
+            );
+        }
+
+        return $this->tabs;
+    }
     
     /**
      * Constructor - Set up admin menu and settings
      */
     public function __construct() {
-        // Define tabs
-        $this->tabs = array(
-            'basic'      => __('Basic Settings', 'custom-dashboard-controller'),
-            'visibility' => __('Menu Visibility', 'custom-dashboard-controller'),
-            'order'      => __('Menu Order', 'custom-dashboard-controller'),
-            'adminbar'   => __('Admin Bar', 'custom-dashboard-controller'),
-            'widgets'    => __('Dashboard Widgets', 'custom-dashboard-controller'),
-            'login'      => __('Login Page', 'custom-dashboard-controller'),
-            'tools'      => __('Tools', 'custom-dashboard-controller')
-        );
-
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
 
@@ -496,7 +512,7 @@ class CDC_Settings {
      */
     private function get_current_tab() {
         $tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'basic';
-        return array_key_exists($tab, $this->tabs) ? $tab : 'basic';
+        return array_key_exists($tab, $this->get_tabs()) ? $tab : 'basic';
     }
     
     /**
@@ -521,7 +537,7 @@ class CDC_Settings {
             
             <!-- Tab Navigation -->
             <nav class="nav-tab-wrapper cdc-nav-tabs">
-                <?php foreach ($this->tabs as $tab_key => $tab_label): ?>
+                <?php foreach ($this->get_tabs() as $tab_key => $tab_label): ?>
                     <a href="?page=dashboard-controller&tab=<?php echo esc_attr($tab_key); ?>" 
                        class="nav-tab <?php echo $current_tab === $tab_key ? 'nav-tab-active' : ''; ?>">
                         <?php echo esc_html($tab_label); ?>

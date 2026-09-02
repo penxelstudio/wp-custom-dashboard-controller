@@ -25,7 +25,14 @@ class CDC_Login_Branding {
      * Constructor - Set up hooks
      */
     public function __construct() {
-        $this->settings = get_option('cdc_login_settings', $this->get_defaults());
+        // Merge over the defaults rather than passing them to get_option(): the
+        // option row is created empty on activation, and get_option() only falls
+        // back to its default when the option does not exist at all. Without the
+        // merge every key below is undefined on a fresh install.
+        $this->settings = wp_parse_args(
+            (array) get_option('cdc_login_settings', array()),
+            $this->get_defaults()
+        );
 
         // Login page hooks
         add_action('login_head', array($this, 'output_custom_styles'));
